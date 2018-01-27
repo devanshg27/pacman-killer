@@ -1,6 +1,7 @@
 #include "main.h"
 #include "timer.h"
 #include "ball.h"
+#include "ground.h"
 
 using namespace std;
 
@@ -13,6 +14,7 @@ GLFWwindow *window;
 **************************/
 
 Ball ball1, ball2;
+Ground ground1, ground2;
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
 
@@ -53,6 +55,8 @@ void draw() {
     // Scene render
     ball1.draw(VP);
     ball2.draw(VP);
+    ground1.draw(VP);
+    ground2.draw(VP);
 }
 
 void tick_input(GLFWwindow *window) {
@@ -113,8 +117,10 @@ void initGL(GLFWwindow *window, int width, int height) {
     /* Objects should be created before any other gl function and shaders */
     // Create the models
 
-    ball1       = Ball(2, -4+ball1.bounding_box().height/2, COLOR_RED);
-    ball2       = Ball(-2, -4+ball1.bounding_box().height/2, COLOR_RED);
+    ball1       = Ball(2, -3.5+ball1.bounding_box().height/2, COLOR_RED);
+    ball2       = Ball(-2, -3.5+ball1.bounding_box().height/2, COLOR_RED);
+    ground1     = Ground(-2, -3.5, COLOR_GREEN, COLOR_RED);
+    ground2     = Ground(2, -3.5, COLOR_GREEN, COLOR_RED);
     ball1.speed = 0;
     ball2.speed = 0;
 
@@ -142,8 +148,8 @@ void initGL(GLFWwindow *window, int width, int height) {
 
 int main(int argc, char **argv) {
     srand(time(0));
-    int width  = 600;
-    int height = 600;
+    int width  = 1600;
+    int height = 900;
 
     window = initGLFW(width, height);
 
@@ -181,5 +187,5 @@ void reset_screen() {
     float bottom = screen_center_y - 4 / screen_zoom;
     float left   = screen_center_x - 4 / screen_zoom;
     float right  = screen_center_x + 4 / screen_zoom;
-    Matrices.projection = glm::ortho(left, right, bottom, top, 0.1f, 500.0f);
+    Matrices.projection = glm::ortho(left*16.0f/9, right*16.0f/9, bottom, top, 0.1f, 500.0f);
 }
