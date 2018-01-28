@@ -20,6 +20,8 @@ struct color_t {
     int b;
 };
 
+extern const float PI;
+
 // nonedit.cpp
 GLFWwindow *initGLFW(int width, int height);
 GLuint     LoadShaders(const char *vertex_file_path, const char *fragment_file_path);
@@ -78,8 +80,10 @@ void reset_screen();
 
 // ---- Colors ----
 extern const color_t COLOR_RED;
+extern const color_t COLOR_BLUE;
 extern const color_t COLOR_GREEN;
 extern const color_t COLOR_BLACK;
 extern const color_t COLOR_BACKGROUND;
+extern const color_t COLOR_BROWN;
 
 #endif

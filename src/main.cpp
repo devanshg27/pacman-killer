@@ -2,6 +2,8 @@
 #include "timer.h"
 #include "ball.h"
 #include "ground.h"
+#include "pool.h"
+#include "trampoline.h"
 
 using namespace std;
 
@@ -13,13 +15,16 @@ GLFWwindow *window;
 * Customizable functions *
 **************************/
 
-Ball ball1, ball2;
+Ball ball2;
 Ground ground1, ground2;
+Pool pool1;
+Trampoline trampoline1;
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
 
 Timer t60(1.0 / 60);
 float ballyspeed = 0;
+const float PI = acos(-1);
 
 /* Render the scene with openGL */
 /* Edit this function according to your assignment */
@@ -53,10 +58,11 @@ void draw() {
     glm::mat4 MVP;  // MVP = Projection * View * Model
 
     // Scene render
-    ball1.draw(VP);
     ball2.draw(VP);
     ground1.draw(VP);
     ground2.draw(VP);
+    trampoline1.draw(VP);
+    pool1.draw(VP);
 }
 
 void tick_input(GLFWwindow *window) {
@@ -66,20 +72,13 @@ void tick_input(GLFWwindow *window) {
     float step = 0.05;
     if (left) {
         ball2.position.x -= step;
-        if(detect_collision(ball1.bounding_box(), ball2.bounding_box()) or ball2.position.x < -4 + ball1.bounding_box().width/2) ball2.position.x += step;
+        if(ball2.position.x < -7.1111111f + ball2.bounding_box().width/2) ball2.position.x += step;
     }
     if (right) {
         ball2.position.x += step;
-        if(detect_collision(ball1.bounding_box(), ball2.bounding_box()) or ball2.position.x > 4 - ball1.bounding_box().width/2) ball2.position.x -= step;
+        if(ball2.position.x > 7.1111111f - ball2.bounding_box().width/2) ball2.position.x -= step;
     }
     ball2.position.y += ballyspeed;
-    if(detect_collision(ball1.bounding_box(), ball2.bounding_box())) {
-        ball2.position.y = ball1.position.y + ball1.bounding_box().height;
-        ballyspeed = 0;
-        if(up) {
-            ballyspeed = 0.1;
-        }
-    }
     if(ball2.position.y < -4 + ball2.bounding_box().height/2) {
         ball2.position.y = -4 + ball2.bounding_box().height/2;
         ballyspeed = 0;
@@ -90,25 +89,8 @@ void tick_input(GLFWwindow *window) {
 }
 
 void tick_elements() {
-    ball1.tick();
     ball2.tick();
     ballyspeed -= 0.002;
-    if (detect_collision(ball1.bounding_box(), ball2.bounding_box())) {
-        ball1.speed = -ball1.speed;
-        ball2.speed = -ball2.speed;
-    }
-    if (ball1.position.x - ball1.bounding_box().width/2 < -4) {
-        ball1.speed = -ball1.speed;
-    }
-    if(ball2.position.x - ball1.bounding_box().width/2 < -4) {
-        ball2.speed = -ball2.speed;
-    }
-    if (ball1.position.x + ball1.bounding_box().width/2 > 4) {
-        ball1.speed = -ball1.speed;
-    }
-    if(ball2.position.x + ball2.bounding_box().width/2 > 4) {
-        ball2.speed = -ball2.speed;
-    }
 }
 
 /* Initialize the OpenGL rendering properties */
@@ -117,11 +99,11 @@ void initGL(GLFWwindow *window, int width, int height) {
     /* Objects should be created before any other gl function and shaders */
     // Create the models
 
-    ball1       = Ball(2, -3.5+ball1.bounding_box().height/2, COLOR_RED);
-    ball2       = Ball(-2, -3.5+ball1.bounding_box().height/2, COLOR_RED);
-    ground1     = Ground(-2, -3.5, COLOR_GREEN, COLOR_RED);
-    ground2     = Ground(2, -3.5, COLOR_GREEN, COLOR_RED);
-    ball1.speed = 0;
+    ball2       = Ball(-2, 3.5+ball2.bounding_box().height/2, COLOR_RED);
+    ground1     = Ground(-4, -3.5, COLOR_GREEN, COLOR_BROWN);
+    ground2     = Ground(4, -3.5, COLOR_GREEN, COLOR_BROWN);
+    pool1     = Pool(0, -3.5, COLOR_GREEN, COLOR_BROWN, COLOR_BLUE);
+    trampoline1     = Trampoline(1, 2.5, COLOR_RED);
     ball2.speed = 0;
 
     // Create and compile our GLSL program from the shaders

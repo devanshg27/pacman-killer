@@ -4,21 +4,21 @@
 Ground::Ground(float x, float y, color_t grassColor, color_t groundColor) {
     this->position = glm::vec3(x, y, 0);
     this->rotation = 0;
-    static const GLfloat vertex_buffer_data1[] = {
-        -1.5, 0.75,  0,
-        -1.5, -1, 0,
-        1.5,  -1, 0,
-        1.5, 0.75, 0,
+    static const GLfloat vertex_buffer_data_ground[] = {
+        -2.5, 0.75,  0,
+        -2.5, -10, 0,
+        2.5,  -10, 0,
+        2.5, 0.75, 0,
     };
-    static const GLfloat vertex_buffer_data2[] = {
-        -1.5, 1, 0,
-        -1.5, 0.75, 0,
-        1.5,  0.75, 0,
-        1.5,  1, 0,
+    static const GLfloat vertex_buffer_data_grass[] = {
+        -2.5, 1, 0,
+        -2.5, 0.75, 0,
+        2.5,  0.75, 0,
+        2.5,  1, 0,
     };
 
-    this->grassObject = create3DObject(GL_TRIANGLE_FAN, 4, vertex_buffer_data1, groundColor, GL_FILL);
-    this->groundObject = create3DObject(GL_TRIANGLE_FAN, 4, vertex_buffer_data2, grassColor, GL_FILL);
+    this->groundObject = create3DObject(GL_TRIANGLE_FAN, 4, vertex_buffer_data_ground, groundColor, GL_FILL);
+    this->grassObject = create3DObject(GL_TRIANGLE_FAN, 4, vertex_buffer_data_grass, grassColor, GL_FILL);
 }
 
 void Ground::draw(glm::mat4 VP) {

@@ -5,17 +5,20 @@ Ball::Ball(float x, float y, color_t color) {
     this->position = glm::vec3(x, y, 0);
     this->rotation = 0;
     speed = 0.01;
-    static const GLfloat vertex_buffer_data[] = {
-        -0.2, -0.2, 0, // vertex 1
-        0.2,  -0.2, 0, // vertex 2
-        0.2,  0.2, 0, // vertex 3
+    const int sides = 50;
 
-        0.2,  0.2, 0, // vertex 3
-        -0.2, 0.2, 0, // vertex 4
-        -0.2, -0.2, 0 // vertex 1
-    };
+    GLfloat vertex_buffer_data[6 + 3*sides]; // Triangle fan requires N+2 vertices for N triangles
 
-    this->object = create3DObject(GL_TRIANGLES, 6, vertex_buffer_data, color, GL_FILL);
+    vertex_buffer_data[0] = 0.0f;
+    vertex_buffer_data[1] = 0.0f;
+    vertex_buffer_data[2] = 0.0f;
+    for(int i=0; i<=sides; ++i) {
+        vertex_buffer_data[3+3*i] = 0.2f*cos(i*2*PI/sides);
+        vertex_buffer_data[4+3*i] = 0.2f*sin(i*2*PI/sides);
+        vertex_buffer_data[5+3*i] = 0.0f;
+    }
+
+    this->object = create3DObject(GL_TRIANGLE_FAN, sizeof(vertex_buffer_data)/(sizeof(vertex_buffer_data[0])*3), vertex_buffer_data, color, GL_FILL);
 }
 
 void Ball::draw(glm::mat4 VP) {
