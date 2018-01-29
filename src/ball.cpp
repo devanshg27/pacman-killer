@@ -55,7 +55,7 @@ void Ball::tick(float dt) {
     this->shape.centerY = this->position.y;
 }
 
-void Ball::handleCollision(Vec2D normal, float restitution) {
+void Ball::handleCollision(Vec2D normal, float restitution, float correction) {
     normal = normal/sqrt(normal * normal); // Make a unit vector
 
     float velAlongNormal = -(this->velocity * normal);
@@ -65,6 +65,10 @@ void Ball::handleCollision(Vec2D normal, float restitution) {
 
     Vec2D impulse = normal / (1 / j);
     this->velocity = this->velocity + impulse;
+
+    if(correction < 0.0005) return;
+    this->position.x += 0.5*normal.x*correction;
+    this->position.y += 0.5*normal.y*correction;
 }
 
 bounding_box_t Ball::bounding_box() {

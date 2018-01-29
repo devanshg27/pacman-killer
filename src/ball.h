@@ -19,7 +19,7 @@ public:
 
     void draw(glm::mat4 VP);
     void set_position(float x, float y);
-    void handleCollision(Vec2D normal, float restitution);
+    void handleCollision(Vec2D normal, float restitution, float correction);
     void tick(float dt);
 
     bounding_box_t bounding_box();

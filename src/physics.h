@@ -39,7 +39,7 @@ float operator^(const Vec2D &a,const Vec2D &b);
 
 #endif // Rectangle_H
 
-std::pair<bool,Vec2D> detect_collision(Rectangle &rec, Circle &cir);
-std::pair<bool,Vec2D> detect_collision(Circle &cir, Rectangle &rec);
-std::pair<bool,Vec2D> detect_collision(PoolHull &pool, Circle &cir);
-std::pair<bool,Vec2D> detect_collision(Circle &cir, PoolHull &pool);
+std::pair<std::pair<bool, float>,Vec2D> detect_collision(Rectangle &rec, Circle &cir);
+std::pair<std::pair<bool, float>,Vec2D> detect_collision(Circle &cir, Rectangle &rec);
+std::pair<std::pair<bool, float>,Vec2D> detect_collision(PoolHull &pool, Circle &cir);
+std::pair<std::pair<bool, float>,Vec2D> detect_collision(Circle &cir, PoolHull &pool);

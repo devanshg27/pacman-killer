@@ -79,26 +79,26 @@ void tick_input(GLFWwindow *window) {
         ball2.position.x += step;
         // if(ball2.position.x > 7.1111111f - ball2.bounding_box().width/2) ball2.position.x -= step;
     }
-    if(detect_collision(ball2.shape, ground1.shape).first) {
+    if(detect_collision(ball2.shape, ground1.shape).first.first) {
         // ballyspeed = 0.02f;
         if(up) {
             ball2.velocity.y = 6;
         }
-        ball2.handleCollision(detect_collision(ball2.shape, ground1.shape).second, ground1.restitution);
+        ball2.handleCollision(detect_collision(ball2.shape, ground1.shape).second, ground1.restitution, detect_collision(ball2.shape, ground1.shape).first.second);
     }
-    if(detect_collision(ball2.shape, ground2.shape).first) {
+    if(detect_collision(ball2.shape, ground2.shape).first.first) {
         // ballyspeed = 0.02f;
         if(up) {
             ball2.velocity.y = 6;
         }
-        ball2.handleCollision(detect_collision(ball2.shape, ground2.shape).second, ground2.restitution);
+        ball2.handleCollision(detect_collision(ball2.shape, ground2.shape).second, ground2.restitution, detect_collision(ball2.shape, ground2.shape).first.second);
     }
-    if(detect_collision(ball2.shape, pool1.shape).first) {
+    if(detect_collision(ball2.shape, pool1.shape).first.first) {
         // ballyspeed = 0.02f;
         if(up) {
             ball2.velocity.y = 6;
         }
-        ball2.handleCollision(detect_collision(ball2.shape, pool1.shape).second, pool1.restitution);
+        ball2.handleCollision(detect_collision(ball2.shape, pool1.shape).second, pool1.restitution, detect_collision(ball2.shape, pool1.shape).first.second);
     }
     ball2.position.y += ballyspeed;
     // if(ball2.position.y < -4 + ball2.bounding_box().height/2) {

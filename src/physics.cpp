@@ -54,7 +54,7 @@ float operator^(const Vec2D &a,const Vec2D &b) {
     return (a.x*b.y)-(b.x*a.y);
 }
 
-std::pair<bool, Vec2D> detect_collision(Rectangle &rec, Circle &cir) {
+std::pair<std::pair<bool, float>, Vec2D> detect_collision(Rectangle &rec, Circle &cir) {
     float tempCenterX = (cir.centerX - rec.xLeft) * rec.cosAng + (cir.centerY - rec.yBottom) * rec.sinAng + rec.xLeft;
     float tempCenterY = (-(cir.centerX - rec.xLeft) * rec.sinAng) + (cir.centerY - rec.yBottom) * rec.cosAng + rec.yBottom;
     float nearestX = tempCenterX, nearestY = tempCenterY;
@@ -64,8 +64,10 @@ std::pair<bool, Vec2D> detect_collision(Rectangle &rec, Circle &cir) {
     nearestY = std::max(nearestY, rec.yBottom);
     nearestY = std::min(nearestY, rec.yTop);
 
-    std::pair<bool, Vec2D> returnVal;
-    returnVal.first = (squaredDis(nearestX, nearestY, tempCenterX, tempCenterY)) <= cir.radius * cir.radius;
+    std::pair<std::pair<bool, float>, Vec2D> returnVal;
+    returnVal.first.first = (squaredDis(nearestX, nearestY, tempCenterX, tempCenterY)) <= cir.radius * cir.radius;
+
+    returnVal.first.second = cir.radius - sqrt(squaredDis(nearestX, nearestY, tempCenterX, tempCenterY));
 
     float tempNearestX = (nearestX - rec.xLeft) * rec.cosAng + (nearestY - rec.yBottom) * (-rec.sinAng) + rec.xLeft;
     float tempNearestY = (nearestX - rec.xLeft) * rec.sinAng + (nearestY - rec.yBottom) * rec.cosAng + rec.yBottom;
@@ -74,24 +76,28 @@ std::pair<bool, Vec2D> detect_collision(Rectangle &rec, Circle &cir) {
     return returnVal;
 }
 
-std::pair<bool, Vec2D> detect_collision(Circle &cir, Rectangle &rec) {
-    std::pair<bool, Vec2D> temp = detect_collision(rec, cir);
+std::pair<std::pair<bool, float>, Vec2D> detect_collision(Circle &cir, Rectangle &rec) {
+    std::pair<std::pair<bool, float>, Vec2D> temp = detect_collision(rec, cir);
     temp.second = temp.second/-1;
     return temp;
 }
 
-std::pair<bool, Vec2D> detect_collision(PoolHull &pool, Circle &cir) {
-    if(cir.centerY >= pool.centerY) return {false, {-1, -1}};
-    if(fabs(cir.centerX - pool.centerX) >= pool.xRange - cir.radius * pool.sinAng) return {false, {-1, -1}};
-    if(squaredDis(cir.centerX, cir.centerY, pool.centerX, pool.centerY) < (pool.radius - cir.radius) * (pool.radius - cir.radius)) return {false, {-1, -1}};
+std::pair<std::pair<bool, float>, Vec2D> detect_collision(PoolHull &pool, Circle &cir) {
+    if(cir.centerY >= pool.centerY) return {{false, -1}, {-1, -1}};
+    if(fabs(cir.centerX - pool.centerX) >= pool.xRange - cir.radius * pool.sinAng) return {{false, -1}, {-1, -1}};
+    if(squaredDis(cir.centerX, cir.centerY, pool.centerX, pool.centerY) < (pool.radius - cir.radius) * (pool.radius - cir.radius)) return {{false, -1}, {-1, -1}};
 
-    Vec2D retNormal = Vec2D(cir.centerX, cir.centerY) - Vec2D(pool.centerX, pool.centerY);
+    std::pair<std::pair<bool, float>, Vec2D> returnVal;
 
-    return {true, retNormal};
+    returnVal.first.first = true;
+    returnVal.first.second = sqrt(squaredDis(cir.centerX, cir.centerY, pool.centerX, pool.centerY)) - (pool.radius - cir.radius);
+    returnVal.second = Vec2D(cir.centerX, cir.centerY) - Vec2D(pool.centerX, pool.centerY);
+
+    return returnVal;
 }
 
-std::pair<bool, Vec2D> detect_collision(Circle &cir, PoolHull &pool) {
-    std::pair<bool, Vec2D> temp = detect_collision(pool, cir);
+std::pair<std::pair<bool, float>, Vec2D> detect_collision(Circle &cir, PoolHull &pool) {
+    std::pair<std::pair<bool, float>, Vec2D> temp = detect_collision(pool, cir);
     temp.second = temp.second/-1;
     return temp;
 }
