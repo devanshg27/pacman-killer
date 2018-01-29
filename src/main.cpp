@@ -73,31 +73,46 @@ void tick_input(GLFWwindow *window) {
     float step = 0.05;
     if (left) {
         ball2.position.x -= step;
-        if(ball2.position.x < -7.1111111f + ball2.bounding_box().width/2) ball2.position.x += step;
+        // if(ball2.position.x < -7.1111111f + ball2.bounding_box().width/2) ball2.position.x += step;
     }
     if (right) {
         ball2.position.x += step;
-        if(ball2.position.x > 7.1111111f - ball2.bounding_box().width/2) ball2.position.x -= step;
+        // if(ball2.position.x > 7.1111111f - ball2.bounding_box().width/2) ball2.position.x -= step;
     }
-    if(detect_collision(ball2.shape, ground1.shape).first or detect_collision(ground2.shape, ball2.shape).first or detect_collision(ball2.shape, pool1.shape).first) {
-        ballyspeed = 0.008f;
+    if(detect_collision(ball2.shape, ground1.shape).first) {
+        // ballyspeed = 0.02f;
         if(up) {
-            ballyspeed = 0.1;
+            ball2.velocity.y = 6;
         }
+        ball2.handleCollision(detect_collision(ball2.shape, ground1.shape).second, ground1.restitution);
+    }
+    if(detect_collision(ball2.shape, ground2.shape).first) {
+        // ballyspeed = 0.02f;
+        if(up) {
+            ball2.velocity.y = 6;
+        }
+        ball2.handleCollision(detect_collision(ball2.shape, ground2.shape).second, ground2.restitution);
+    }
+    if(detect_collision(ball2.shape, pool1.shape).first) {
+        // ballyspeed = 0.02f;
+        if(up) {
+            ball2.velocity.y = 6;
+        }
+        ball2.handleCollision(detect_collision(ball2.shape, pool1.shape).second, pool1.restitution);
     }
     ball2.position.y += ballyspeed;
-    if(ball2.position.y < -4 + ball2.bounding_box().height/2) {
-        ball2.position.y = -4 + ball2.bounding_box().height/2;
-        ballyspeed = 0;
-        if(up) {
-            ballyspeed = 0.1;
-        }
-    }
+    // if(ball2.position.y < -4 + ball2.bounding_box().height/2) {
+    //     ball2.position.y = -4 + ball2.bounding_box().height/2;
+    //     ballyspeed = 0;
+    //     if(up) {
+    //         ballyspeed = 0.1;
+    //     }
+    // }
 }
 
 void tick_elements() {
-    ball2.tick();
-    ballyspeed -= 0.002;
+    ball2.tick(1.0/60);
+    // ballyspeed -= 0.002;
 }
 
 /* Initialize the OpenGL rendering properties */
@@ -106,12 +121,11 @@ void initGL(GLFWwindow *window, int width, int height) {
     /* Objects should be created before any other gl function and shaders */
     // Create the models
 
-    ball2       = Ball(-2, 3.5+ball2.bounding_box().height/2, COLOR_RED);
+    ball2       = Ball(1, -2, 3.5+ball2.bounding_box().height/2, COLOR_RED);
     ground1     = Ground(-4, -3.5, COLOR_GREEN, COLOR_BROWN);
     ground2     = Ground(4, -3.5, COLOR_GREEN, COLOR_BROWN);
     pool1     = Pool(0, -3.5, COLOR_GREEN, COLOR_BROWN, COLOR_BLUE);
     trampoline1     = Trampoline(1, 2.5, COLOR_RED);
-    ball2.speed = 0;
 
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
@@ -155,8 +169,8 @@ int main(int argc, char **argv) {
             // Swap Frame Buffer in double buffering
             glfwSwapBuffers(window);
 
-            tick_elements();
             tick_input(window);
+            tick_elements();
         }
         // Poll for Keyboard and mouse events
         glfwPollEvents();

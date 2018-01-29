@@ -8,14 +8,19 @@
 class Ball {
 public:
     Ball() {}
-    Ball(float x, float y, color_t color);
+    Ball(float _mass, float x, float y, color_t color);
     glm::vec3 position;
     Circle shape;
     float rotation;
+
+    Vec2D velocity, acceleration;
+    float angularVelocity, angularAcceleration;
+    float mass, momentOfInertia;
+
     void draw(glm::mat4 VP);
     void set_position(float x, float y);
-    void tick();
-    double speed;
+    void handleCollision(Vec2D normal, float restitution);
+    void tick(float dt);
 
     bounding_box_t bounding_box();
 private:

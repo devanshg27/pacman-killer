@@ -11,6 +11,7 @@ public:
     glm::vec3 position;
     PoolHull shape;
     float rotation;
+    float restitution;
     void draw(glm::mat4 VP);
 private:
     VAO *grassObject;

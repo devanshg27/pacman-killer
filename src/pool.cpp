@@ -5,6 +5,8 @@ Pool::Pool(float x, float y, color_t grassColor, color_t groundColor, color_t wa
     this->position = glm::vec3(x, y, 0);
     this->rotation = 0;
 
+    this->restitution = 0;
+
     static const GLfloat vertex_buffer_data1[] = {
         -2.5, 0.75,  0,
         -2.5, -10, 0,

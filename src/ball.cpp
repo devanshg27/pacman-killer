@@ -2,10 +2,15 @@
 #include "main.h"
 #include "physics.h"
 
-Ball::Ball(float x, float y, color_t color) {
+Ball::Ball(float _mass, float x, float y, color_t color) {
     this->position = glm::vec3(x, y, 0);
     this->rotation = 0;
-    speed = 0.01;
+    this->mass = _mass;
+    this->momentOfInertia = (_mass * 0.2 * 0.2) / 2; // I = (m*r^2)/2
+    this->velocity = Vec2D(0, 0);
+    this->acceleration = Vec2D(0, -5);
+    angularVelocity = angularAcceleration = 0;
+
     const int sides = 50;
 
     GLfloat vertex_buffer_data[6 + 3*sides]; // Triangle fan requires N+2 vertices for N triangles
@@ -39,11 +44,27 @@ void Ball::set_position(float x, float y) {
     this->position = glm::vec3(x, y, 0);
 }
 
-void Ball::tick() {
-    this->position.x -= speed;
+void Ball::tick(float dt) {
+    this->velocity = this->velocity + (this->acceleration/(1/dt));
+    this->angularVelocity += this->angularAcceleration * dt;
+    this->position.x += this->velocity.x * dt;
+    this->position.y += this->velocity.y * dt;
+    this->rotation += this->angularVelocity * dt;
+
     this->shape.centerX = this->position.x;
     this->shape.centerY = this->position.y;
-    // this->position.y -= speed;
+}
+
+void Ball::handleCollision(Vec2D normal, float restitution) {
+    normal = normal/sqrt(normal * normal); // Make a unit vector
+
+    float velAlongNormal = -(this->velocity * normal);
+    if(velAlongNormal <= 0) return;
+
+    float j = (1 + restitution) * velAlongNormal;
+
+    Vec2D impulse = normal / (1 / j);
+    this->velocity = this->velocity + impulse;
 }
 
 bounding_box_t Ball::bounding_box() {
