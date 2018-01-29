@@ -1,6 +1,7 @@
 #include "main.h"
 #include "timer.h"
 #include "ball.h"
+#include "physics.h"
 #include "ground.h"
 #include "pool.h"
 #include "trampoline.h"
@@ -58,11 +59,11 @@ void draw() {
     glm::mat4 MVP;  // MVP = Projection * View * Model
 
     // Scene render
-    ball2.draw(VP);
+    trampoline1.draw(VP);
     ground1.draw(VP);
     ground2.draw(VP);
-    trampoline1.draw(VP);
     pool1.draw(VP);
+    ball2.draw(VP);
 }
 
 void tick_input(GLFWwindow *window) {
@@ -77,6 +78,12 @@ void tick_input(GLFWwindow *window) {
     if (right) {
         ball2.position.x += step;
         if(ball2.position.x > 7.1111111f - ball2.bounding_box().width/2) ball2.position.x -= step;
+    }
+    if(detect_collision(ball2.shape, ground1.shape).first or detect_collision(ground2.shape, ball2.shape).first or detect_collision(ball2.shape, pool1.shape).first) {
+        ballyspeed = 0.008f;
+        if(up) {
+            ballyspeed = 0.1;
+        }
     }
     ball2.position.y += ballyspeed;
     if(ball2.position.y < -4 + ball2.bounding_box().height/2) {
@@ -151,7 +158,6 @@ int main(int argc, char **argv) {
             tick_elements();
             tick_input(window);
         }
-
         // Poll for Keyboard and mouse events
         glfwPollEvents();
     }

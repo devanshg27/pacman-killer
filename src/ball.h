@@ -1,4 +1,5 @@
 #include "main.h"
+#include "physics.h"
 
 #ifndef BALL_H
 #define BALL_H
@@ -9,11 +10,13 @@ public:
     Ball() {}
     Ball(float x, float y, color_t color);
     glm::vec3 position;
+    Circle shape;
     float rotation;
     void draw(glm::mat4 VP);
     void set_position(float x, float y);
     void tick();
     double speed;
+
     bounding_box_t bounding_box();
 private:
     VAO *object;

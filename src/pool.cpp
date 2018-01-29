@@ -38,6 +38,8 @@ Pool::Pool(float x, float y, color_t grassColor, color_t groundColor, color_t wa
     this->groundObject = create3DObject(GL_TRIANGLE_FAN, 4, vertex_buffer_data1, groundColor, GL_FILL);
     this->grassObject = create3DObject(GL_TRIANGLE_FAN, 4, vertex_buffer_data2, grassColor, GL_FILL);
     this->waterObject = create3DObject(GL_TRIANGLE_FAN, sides+2, vertex_buffer_data_water, waterColor, GL_FILL);
+
+    this->shape = PoolHull(x, y + 1 + r - poolDepth, r, poolWidth);
 }
 
 void Pool::draw(glm::mat4 VP) {
@@ -51,8 +53,4 @@ void Pool::draw(glm::mat4 VP) {
     draw3DObject(this->grassObject);
     draw3DObject(this->groundObject);
     draw3DObject(this->waterObject);
-}
-
-void Pool::set_position(float x, float y) {
-    this->position = glm::vec3(x, y, 0);
 }

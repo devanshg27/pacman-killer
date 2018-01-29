@@ -4,6 +4,7 @@
 Ground::Ground(float x, float y, color_t grassColor, color_t groundColor) {
     this->position = glm::vec3(x, y, 0);
     this->rotation = 0;
+    this->shape = Rectangle(x-2.5, y-10, x+2.5, y+1, this->rotation);
     static const GLfloat vertex_buffer_data_ground[] = {
         -2.5, 0.75,  0,
         -2.5, -10, 0,
@@ -31,8 +32,4 @@ void Ground::draw(glm::mat4 VP) {
     glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
     draw3DObject(this->grassObject);
     draw3DObject(this->groundObject);
-}
-
-void Ground::set_position(float x, float y) {
-    this->position = glm::vec3(x, y, 0);
 }

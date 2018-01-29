@@ -1,5 +1,6 @@
 #include "ball.h"
 #include "main.h"
+#include "physics.h"
 
 Ball::Ball(float x, float y, color_t color) {
     this->position = glm::vec3(x, y, 0);
@@ -17,6 +18,8 @@ Ball::Ball(float x, float y, color_t color) {
         vertex_buffer_data[4+3*i] = 0.2f*sin(i*2*PI/sides);
         vertex_buffer_data[5+3*i] = 0.0f;
     }
+
+    this->shape = Circle(x, y, 0.2);
 
     this->object = create3DObject(GL_TRIANGLE_FAN, sizeof(vertex_buffer_data)/(sizeof(vertex_buffer_data[0])*3), vertex_buffer_data, color, GL_FILL);
 }
@@ -38,6 +41,8 @@ void Ball::set_position(float x, float y) {
 
 void Ball::tick() {
     this->position.x -= speed;
+    this->shape.centerX = this->position.x;
+    this->shape.centerY = this->position.y;
     // this->position.y -= speed;
 }
 
