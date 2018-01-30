@@ -112,10 +112,13 @@ void tick_input(GLFWwindow *window) {
         }
         ball2.handleCollision(detect_collision(ball2.shape, pool1.shape).second, pool1.restitution, detect_collision(ball2.shape, pool1.shape).first.second);
     }
+    if(detect_collision(ball2.shape, trampoline1.shape).first.first and ball2.velocity.y < 0) {
+        ball2.handleCollision(detect_collision(ball2.shape, trampoline1.shape).second, trampoline1.restitution, detect_collision(ball2.shape, trampoline1.shape).first.second);
+    }
 }
 
 void tick_elements() {
-    ball2.tick(1.0/60, ball2.shape.centerY - ball2.shape.radius < -2.5 );
+    ball2.tick(1.0/60, ball2.shape.centerY - ball2.shape.radius < -2.51 );
 }
 
 /* Initialize the OpenGL rendering properties */
@@ -128,7 +131,7 @@ void initGL(GLFWwindow *window, int width, int height) {
     ground1     = Ground(-4, -3.5, COLOR_GREEN, COLOR_BROWN);
     ground2     = Ground(4, -3.5, COLOR_GREEN, COLOR_BROWN);
     pool1     = Pool(0, -3.5, COLOR_GREEN, COLOR_BROWN, COLOR_BLUE);
-    trampoline1     = Trampoline(1, 2.5, COLOR_RED);
+    trampoline1     = Trampoline(4, -2.5, COLOR_RED);
 
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
