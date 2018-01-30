@@ -96,26 +96,26 @@ void tick_input(GLFWwindow *window) {
     int up = glfwGetKey(window, GLFW_KEY_UP);
     if(detect_collision(ball2.shape, ground1.shape).first.first) {
         if(up) {
-            ball2.velocity.y = 5;
+            ball2.velocity.y = 4.5;
         }
         ball2.handleCollision(detect_collision(ball2.shape, ground1.shape).second, ground1.restitution, detect_collision(ball2.shape, ground1.shape).first.second);
     }
     if(detect_collision(ball2.shape, ground2.shape).first.first) {
         if(up) {
-            ball2.velocity.y = 5;
+            ball2.velocity.y = 4.5;
         }
         ball2.handleCollision(detect_collision(ball2.shape, ground2.shape).second, ground2.restitution, detect_collision(ball2.shape, ground2.shape).first.second);
     }
     if(detect_collision(ball2.shape, pool1.shape).first.first) {
         if(up) {
-            ball2.velocity.y = 5;
+            ball2.velocity.y = 3.5;
         }
         ball2.handleCollision(detect_collision(ball2.shape, pool1.shape).second, pool1.restitution, detect_collision(ball2.shape, pool1.shape).first.second);
     }
 }
 
 void tick_elements() {
-    ball2.tick(1.0/60);
+    ball2.tick(1.0/60, ball2.shape.centerY - ball2.shape.radius < -2.5 );
 }
 
 /* Initialize the OpenGL rendering properties */

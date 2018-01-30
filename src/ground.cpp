@@ -7,7 +7,7 @@ Ground::Ground(float x, float y, color_t grassColor, color_t groundColor) {
     this->restitution = 0.4;
     this->shape = Rectangle(x-2.5, y-10, x+2.5, y+1, this->rotation);
     static const GLfloat vertex_buffer_data_ground[] = {
-        -2.5, 0.75,  0,
+        -2.5, 0.75, 0,
         -2.5, -10, 0,
         2.5,  -10, 0,
         2.5, 0.75, 0,

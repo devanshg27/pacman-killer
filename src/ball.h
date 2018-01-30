@@ -20,7 +20,7 @@ public:
     void draw(glm::mat4 VP);
     void set_position(float x, float y);
     void handleCollision(Vec2D normal, float restitution, float correction);
-    void tick(float dt);
+    void tick(float dt, bool inWater);
 
     bounding_box_t bounding_box();
 private:

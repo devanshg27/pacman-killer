@@ -2,6 +2,12 @@
 #include "main.h"
 #include "physics.h"
 
+float sign_function(float a) {
+    if(fabs(a) <= 0.0001) return 0;
+    if(a < 0) return -1;
+    return 1;
+}
+
 Ball::Ball(float _mass, float x, float y, color_t color) {
     this->position = glm::vec3(x, y, 0);
     this->rotation = 0;
@@ -44,11 +50,15 @@ void Ball::set_position(float x, float y) {
     this->position = glm::vec3(x, y, 0);
 }
 
-void Ball::tick(float dt) {
+void Ball::tick(float dt, bool inWater) {
+    Vec2D tempFriction = (Vec2D(sign_function(this->velocity.x), sign_function(this->velocity.y))/(inWater ? 1: 4));
+    this->acceleration = this->acceleration - tempFriction;
+
     this->velocity = this->velocity + (this->acceleration/(1/dt));
+    this->acceleration = this->acceleration + tempFriction;
     this->angularVelocity += this->angularAcceleration * dt;
-    this->position.x += this->velocity.x * dt;
-    this->position.y += this->velocity.y * dt;
+    this->position.x += (inWater ? 0.5 : 1) * this->velocity.x * dt;
+    this->position.y += (inWater ? 0.5 : 1) * this->velocity.y * dt;
     this->rotation += this->angularVelocity * dt;
 
     this->velocity.x = std::min(this->velocity.x, 10.0f);
