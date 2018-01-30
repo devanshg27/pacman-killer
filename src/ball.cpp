@@ -51,6 +51,11 @@ void Ball::tick(float dt) {
     this->position.y += this->velocity.y * dt;
     this->rotation += this->angularVelocity * dt;
 
+    this->velocity.x = std::min(this->velocity.x, 10.0f);
+    this->velocity.x = std::max(this->velocity.x, -10.0f);
+
+    this->velocity.y = std::min(this->velocity.y, 8.0f);
+
     this->shape.centerX = this->position.x;
     this->shape.centerY = this->position.y;
 }
@@ -67,8 +72,8 @@ void Ball::handleCollision(Vec2D normal, float restitution, float correction) {
     this->velocity = this->velocity + impulse;
 
     if(correction < 0.0005) return;
-    this->position.x += 0.5*normal.x*correction;
-    this->position.y += 0.5*normal.y*correction;
+    this->position.x += 0.7*normal.x*correction;
+    this->position.y += 0.7*normal.y*correction;
 }
 
 bounding_box_t Ball::bounding_box() {

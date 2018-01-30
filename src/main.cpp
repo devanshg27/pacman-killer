@@ -24,8 +24,32 @@ Trampoline trampoline1;
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
 
 Timer t60(1.0 / 60);
-float ballyspeed = 0;
 const float PI = acos(-1);
+
+void inputHandler(int key, int action) {
+    if(key == GLFW_KEY_LEFT) {
+        if(action == GLFW_PRESS) {
+            ball2.velocity.x -= 2.5f;
+            if(ball2.velocity.x < -4.0f) ball2.velocity.x = min(ball2.velocity.x + 2.5f, -4.0f);
+            ball2.acceleration.x -= 1.5f;
+        }
+        else if(action == GLFW_RELEASE) {
+            if(ball2.velocity.x < 0) ball2.velocity.x = 0;
+            ball2.acceleration.x += 1.5f;
+        }
+    }
+    if(key == GLFW_KEY_RIGHT) {
+        if(action == GLFW_PRESS) {
+            ball2.velocity.x += 2.5f;
+            if(ball2.velocity.x > 4.0f) ball2.velocity.x = max(ball2.velocity.x - 2.5f, 4.0f);
+            ball2.acceleration.x += 1.5f;
+        }
+        else if(action == GLFW_RELEASE) {
+            ball2.acceleration.x -= 1.5f;
+            if(ball2.velocity.x > 0) ball2.velocity.x = 0;
+        }
+    }
+}
 
 /* Render the scene with openGL */
 /* Edit this function according to your assignment */
@@ -70,49 +94,28 @@ void tick_input(GLFWwindow *window) {
     int left  = glfwGetKey(window, GLFW_KEY_LEFT);
     int right = glfwGetKey(window, GLFW_KEY_RIGHT);
     int up = glfwGetKey(window, GLFW_KEY_UP);
-    float step = 0.05;
-    if (left) {
-        ball2.position.x -= step;
-        // if(ball2.position.x < -7.1111111f + ball2.bounding_box().width/2) ball2.position.x += step;
-    }
-    if (right) {
-        ball2.position.x += step;
-        // if(ball2.position.x > 7.1111111f - ball2.bounding_box().width/2) ball2.position.x -= step;
-    }
     if(detect_collision(ball2.shape, ground1.shape).first.first) {
-        // ballyspeed = 0.02f;
         if(up) {
-            ball2.velocity.y = 6;
+            ball2.velocity.y = 5;
         }
         ball2.handleCollision(detect_collision(ball2.shape, ground1.shape).second, ground1.restitution, detect_collision(ball2.shape, ground1.shape).first.second);
     }
     if(detect_collision(ball2.shape, ground2.shape).first.first) {
-        // ballyspeed = 0.02f;
         if(up) {
-            ball2.velocity.y = 6;
+            ball2.velocity.y = 5;
         }
         ball2.handleCollision(detect_collision(ball2.shape, ground2.shape).second, ground2.restitution, detect_collision(ball2.shape, ground2.shape).first.second);
     }
     if(detect_collision(ball2.shape, pool1.shape).first.first) {
-        // ballyspeed = 0.02f;
         if(up) {
-            ball2.velocity.y = 6;
+            ball2.velocity.y = 5;
         }
         ball2.handleCollision(detect_collision(ball2.shape, pool1.shape).second, pool1.restitution, detect_collision(ball2.shape, pool1.shape).first.second);
     }
-    ball2.position.y += ballyspeed;
-    // if(ball2.position.y < -4 + ball2.bounding_box().height/2) {
-    //     ball2.position.y = -4 + ball2.bounding_box().height/2;
-    //     ballyspeed = 0;
-    //     if(up) {
-    //         ballyspeed = 0.1;
-    //     }
-    // }
 }
 
 void tick_elements() {
     ball2.tick(1.0/60);
-    // ballyspeed -= 0.002;
 }
 
 /* Initialize the OpenGL rendering properties */
@@ -121,7 +124,7 @@ void initGL(GLFWwindow *window, int width, int height) {
     /* Objects should be created before any other gl function and shaders */
     // Create the models
 
-    ball2       = Ball(1, -2, 3.5+ball2.bounding_box().height/2, COLOR_RED);
+    ball2       = Ball(1, -2, -1.5+ball2.bounding_box().height/2, COLOR_RED);
     ground1     = Ground(-4, -3.5, COLOR_GREEN, COLOR_BROWN);
     ground2     = Ground(4, -3.5, COLOR_GREEN, COLOR_BROWN);
     pool1     = Pool(0, -3.5, COLOR_GREEN, COLOR_BROWN, COLOR_BLUE);
