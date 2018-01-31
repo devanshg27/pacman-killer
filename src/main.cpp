@@ -32,7 +32,7 @@ Timer t60(1.0 / 60);
 const float PI = acos(-1);
 
 void inputHandler(int key, int action) {
-    if(key == GLFW_KEY_LEFT) {
+    if(key == GLFW_KEY_A) {
         if(action == GLFW_PRESS) {
             ball2.velocity.x -= 2.5f;
             if(ball2.velocity.x < -4.0f) ball2.velocity.x = min(ball2.velocity.x + 2.5f, -4.0f);
@@ -43,7 +43,7 @@ void inputHandler(int key, int action) {
             ball2.acceleration.x += 1.5f;
         }
     }
-    if(key == GLFW_KEY_RIGHT) {
+    if(key == GLFW_KEY_D) {
         if(action == GLFW_PRESS) {
             ball2.velocity.x += 2.5f;
             if(ball2.velocity.x > 4.0f) ball2.velocity.x = max(ball2.velocity.x - 2.5f, 4.0f);
@@ -98,9 +98,23 @@ void draw() {
 }
 
 void tick_input(GLFWwindow *window) {
-    int left  = glfwGetKey(window, GLFW_KEY_LEFT);
-    int right = glfwGetKey(window, GLFW_KEY_RIGHT);
-    int up = glfwGetKey(window, GLFW_KEY_UP);
+    int up = glfwGetKey(window, GLFW_KEY_SPACE);
+    if(glfwGetKey(window, GLFW_KEY_LEFT)) {
+        screen_center_x -= 0.01f;
+        reset_screen();
+    }
+    if(glfwGetKey(window, GLFW_KEY_RIGHT)) {
+        screen_center_x += 0.01f;
+        reset_screen();
+    }
+    if(glfwGetKey(window, GLFW_KEY_DOWN)) {
+        screen_center_y -= 0.01f;
+        reset_screen();
+    }
+    if(glfwGetKey(window, GLFW_KEY_UP)) {
+        screen_center_y += 0.01f;
+        reset_screen();
+    }
     if(detect_collision(ball2.shape, pool1.shape).first.first) {
         if(up) {
             ball2.velocity.y = 3.5;
@@ -191,6 +205,7 @@ int main(int argc, char **argv) {
 
             tick_input(window);
             tick_elements();
+            reset_screen();
         }
         // Poll for Keyboard and mouse events
         glfwPollEvents();
@@ -209,5 +224,39 @@ void reset_screen() {
     float bottom = screen_center_y - 4 / screen_zoom;
     float left   = screen_center_x - 4 / screen_zoom;
     float right  = screen_center_x + 4 / screen_zoom;
-    Matrices.projection = glm::ortho(left*16.0f/9, right*16.0f/9, bottom, top, 0.1f, 500.0f);
+
+    left *= 16.0f/9;
+    right *= 16.0f/9;
+
+    float edgeRatio = 0.85;
+
+    float temp = edgeRatio * top + (1 - edgeRatio) * bottom;
+    if(ball2.position.y > temp) {
+        float diff = ball2.position.y - temp;
+        screen_center_y += diff;
+        top += diff;
+        bottom += diff;
+    }
+    temp = edgeRatio * bottom + (1 - edgeRatio) * top;
+    if(ball2.position.y < temp) {
+        float diff = ball2.position.y - temp;
+        screen_center_y += diff;
+        top += diff;
+        bottom += diff;
+    }
+    temp = edgeRatio * right + (1 - edgeRatio) * left;
+    if(ball2.position.x > temp) {
+        float diff = ball2.position.x - temp;
+        screen_center_x += diff;
+        right += diff;
+        left += diff;
+    }
+    temp = edgeRatio * left + (1 - edgeRatio) * right;
+    if(ball2.position.x < temp) {
+        float diff = ball2.position.x - temp;
+        screen_center_x += diff;
+        right += diff;
+        left += diff;
+    }
+    Matrices.projection = glm::ortho(left, right, bottom, top, 0.1f, 500.0f);
 }
