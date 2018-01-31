@@ -1,9 +1,12 @@
 #include "porcupine.h"
 #include "main.h"
 
-Porcupine::Porcupine(float x, float y, color_t color) {
+Porcupine::Porcupine(float x, float y, color_t color, float x_add, float minX, float maxX) {
     this->position = glm::vec3(x, y, 0);
     this->restitution = 0.7;
+    this->x_add = x_add;
+    this->minX = minX;
+    this->maxX = maxX;
     float width = 0.25;
     float height = (sqrt(3) * width / 2.0);
     const int num = 7;
@@ -36,6 +39,9 @@ void Porcupine::draw(glm::mat4 VP) {
     draw3DObject(this->object);
 }
 
-void Porcupine::set_position(float x, float y) {
-    this->position = glm::vec3(x, y, 0);
+void Porcupine::move() {
+    if(this->position.x + this->x_add < this->minX or this->position.x + this->x_add > this->maxX) this->x_add *= -1;
+    this->position = glm::vec3(this->position.x + this->x_add, this->position.y, 0);
+    this->shape.xLeft += this->x_add;
+    this->shape.xRight += this->x_add;
 }

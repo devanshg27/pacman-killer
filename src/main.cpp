@@ -130,6 +130,7 @@ void tick_input(GLFWwindow *window) {
 
 void tick_elements() {
     ball2.tick(1.0/60, ball2.shape.centerY - ball2.shape.radius < -2.51 );
+    porcupine1.move();
 }
 
 /* Initialize the OpenGL rendering properties */
@@ -143,7 +144,7 @@ void initGL(GLFWwindow *window, int width, int height) {
     ground2     = Ground(4, -3.5, COLOR_GREEN, COLOR_BROWN);
     pool1     = Pool(0, -3.5, COLOR_GREEN, COLOR_BROWN, COLOR_BLUE);
     trampoline1     = Trampoline(4, -2.5, COLOR_RED);
-    porcupine1     = Porcupine(-4, -2.5, COLOR_RED);
+    porcupine1     = Porcupine(-4, -2.5, COLOR_RED, 0.01, -6, -3.5);
     magnet1     = Magnet(0, 0, COLOR_BROWN, COLOR_BLUE, PI);
 
     // Create and compile our GLSL program from the shaders
