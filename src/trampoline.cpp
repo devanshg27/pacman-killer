@@ -4,7 +4,7 @@
 Trampoline::Trampoline(float x, float y, color_t color) {
     this->position = glm::vec3(x, y, 0);
     this->rotation = 0;
-    this->restitution = 1.37;
+    this->restitution = 1.4;
     this->shape = Rectangle(x-1.2, y+0.9, x+1.2, y+0.91, this->rotation);
     const GLfloat vertex_buffer_data_trampoline_left[] = {
         -1, 0.75, 0,

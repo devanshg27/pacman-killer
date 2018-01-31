@@ -5,6 +5,7 @@
 #include "ground.h"
 #include "pool.h"
 #include "trampoline.h"
+#include "porcupine.h"
 
 using namespace std;
 
@@ -20,6 +21,7 @@ Ball ball2;
 Ground ground1, ground2;
 Pool pool1;
 Trampoline trampoline1;
+Porcupine porcupine1;
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
 
@@ -88,12 +90,19 @@ void draw() {
     ground2.draw(VP);
     pool1.draw(VP);
     ball2.draw(VP);
+    porcupine1.draw(VP);
 }
 
 void tick_input(GLFWwindow *window) {
     int left  = glfwGetKey(window, GLFW_KEY_LEFT);
     int right = glfwGetKey(window, GLFW_KEY_RIGHT);
     int up = glfwGetKey(window, GLFW_KEY_UP);
+    if(detect_collision(ball2.shape, pool1.shape).first.first) {
+        if(up) {
+            ball2.velocity.y = 3.5;
+        }
+        ball2.handleCollision(detect_collision(ball2.shape, pool1.shape).second, pool1.restitution, detect_collision(ball2.shape, pool1.shape).first.second);
+    }
     if(detect_collision(ball2.shape, ground1.shape).first.first) {
         if(up) {
             ball2.velocity.y = 4.5;
@@ -106,14 +115,12 @@ void tick_input(GLFWwindow *window) {
         }
         ball2.handleCollision(detect_collision(ball2.shape, ground2.shape).second, ground2.restitution, detect_collision(ball2.shape, ground2.shape).first.second);
     }
-    if(detect_collision(ball2.shape, pool1.shape).first.first) {
-        if(up) {
-            ball2.velocity.y = 3.5;
-        }
-        ball2.handleCollision(detect_collision(ball2.shape, pool1.shape).second, pool1.restitution, detect_collision(ball2.shape, pool1.shape).first.second);
-    }
     if(detect_collision(ball2.shape, trampoline1.shape).first.first and ball2.velocity.y < 0) {
         ball2.handleCollision(detect_collision(ball2.shape, trampoline1.shape).second, trampoline1.restitution, detect_collision(ball2.shape, trampoline1.shape).first.second);
+    }
+    if(detect_collision(ball2.shape, porcupine1.shape).first.first) {
+        printf("Spiked\n");
+        ball2.handleCollision(detect_collision(ball2.shape, porcupine1.shape).second, porcupine1.restitution, detect_collision(ball2.shape, porcupine1.shape).first.second);
     }
 }
 
@@ -132,6 +139,7 @@ void initGL(GLFWwindow *window, int width, int height) {
     ground2     = Ground(4, -3.5, COLOR_GREEN, COLOR_BROWN);
     pool1     = Pool(0, -3.5, COLOR_GREEN, COLOR_BROWN, COLOR_BLUE);
     trampoline1     = Trampoline(4, -2.5, COLOR_RED);
+    porcupine1     = Porcupine(-4, -2.5, COLOR_RED);
 
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
