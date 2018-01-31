@@ -21,6 +21,7 @@ struct color_t {
 };
 
 extern const float PI;
+extern float magnetForce;
 
 // nonedit.cpp
 GLFWwindow *initGLFW(int width, int height);

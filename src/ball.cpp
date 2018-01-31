@@ -53,8 +53,10 @@ void Ball::set_position(float x, float y) {
 void Ball::tick(float dt, bool inWater) {
     Vec2D tempFriction = (Vec2D(sign_function(this->velocity.x), sign_function(this->velocity.y))/(inWater ? 1: 4));
     this->acceleration = this->acceleration - tempFriction;
+    this->acceleration.x += magnetForce;
 
     this->velocity = this->velocity + (this->acceleration/(1/dt));
+    this->acceleration.x -= magnetForce;
     this->acceleration = this->acceleration + tempFriction;
     this->angularVelocity += this->angularAcceleration * dt;
     this->position.x += (inWater ? 0.5 : 1) * this->velocity.x * dt;

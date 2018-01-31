@@ -6,6 +6,7 @@
 #include "pool.h"
 #include "trampoline.h"
 #include "porcupine.h"
+#include "magnet.h"
 
 using namespace std;
 
@@ -22,8 +23,10 @@ Ground ground1, ground2;
 Pool pool1;
 Trampoline trampoline1;
 Porcupine porcupine1;
+Magnet magnet1;
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
+float magnetForce = 1;
 
 Timer t60(1.0 / 60);
 const float PI = acos(-1);
@@ -89,8 +92,9 @@ void draw() {
     ground1.draw(VP);
     ground2.draw(VP);
     pool1.draw(VP);
-    ball2.draw(VP);
     porcupine1.draw(VP);
+    magnet1.draw(VP);
+    ball2.draw(VP);
 }
 
 void tick_input(GLFWwindow *window) {
@@ -140,6 +144,7 @@ void initGL(GLFWwindow *window, int width, int height) {
     pool1     = Pool(0, -3.5, COLOR_GREEN, COLOR_BROWN, COLOR_BLUE);
     trampoline1     = Trampoline(4, -2.5, COLOR_RED);
     porcupine1     = Porcupine(-4, -2.5, COLOR_RED);
+    magnet1     = Magnet(0, 0, COLOR_BROWN, COLOR_BLUE, PI);
 
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
