@@ -27,11 +27,15 @@ Magnet magnet1;
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
 float magnetForce = 1;
+bool lbutton_down = false;
+float previous_x_position;
+int curMouseVel = 0;
 
 Timer t60(1.0 / 60);
 const float PI = acos(-1);
 
 void inputHandler(int key, int action) {
+    if(lbutton_down) return;
     if(key == GLFW_KEY_A) {
         if(action == GLFW_PRESS) {
             ball2.velocity.x -= 2.5f;
@@ -98,6 +102,35 @@ void draw() {
 }
 
 void tick_input(GLFWwindow *window) {
+    if(lbutton_down and curMouseVel == 0) {
+        double x;
+        double y;
+        glfwGetCursorPos(window, &x, &y);
+        if(x > previous_x_position) {
+            ball2.velocity.x += 2.5f;
+            if(ball2.velocity.x > 4.0f) ball2.velocity.x = max(ball2.velocity.x - 2.5f, 4.0f);
+            ball2.acceleration.x += 1.5f;
+            curMouseVel = 1;
+        }
+        else if(x < previous_x_position){
+            ball2.velocity.x -= 2.5f;
+            if(ball2.velocity.x < -4.0f) ball2.velocity.x = min(ball2.velocity.x + 2.5f, -4.0f);
+            ball2.acceleration.x -= 1.5f;
+            curMouseVel = -1;
+        }
+        previous_x_position = x;
+    }
+    else if(not lbutton_down and curMouseVel == 1){
+        ball2.acceleration.x -= 1.5f;
+        if(ball2.velocity.x > 0) ball2.velocity.x = 0;
+        curMouseVel = 0;
+    }
+    else if(not lbutton_down and curMouseVel == -1){
+        if(ball2.velocity.x < 0) ball2.velocity.x = 0;
+        ball2.acceleration.x += 1.5f;
+        curMouseVel = 0;
+    }
+
     int up = glfwGetKey(window, GLFW_KEY_SPACE);
     if(glfwGetKey(window, GLFW_KEY_LEFT)) {
         screen_center_x -= 0.01f;
