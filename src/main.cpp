@@ -7,6 +7,7 @@
 #include "trampoline.h"
 #include "porcupine.h"
 #include "magnet.h"
+#include "enemy.h"
 
 using namespace std;
 
@@ -24,6 +25,7 @@ Pool pool1;
 Trampoline trampoline1;
 Porcupine porcupine1;
 Magnet magnet1;
+Enemy enemy1;
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
 float magnetForce = 1;
@@ -99,6 +101,7 @@ void draw() {
     porcupine1.draw(VP);
     magnet1.draw(VP);
     ball2.draw(VP);
+    enemy1.draw(VP);
 }
 
 void tick_input(GLFWwindow *window) {
@@ -173,11 +176,18 @@ void tick_input(GLFWwindow *window) {
         printf("Spiked\n");
         ball2.handleCollision(detect_collision(ball2.shape, porcupine1.shape).second, porcupine1.restitution, detect_collision(ball2.shape, porcupine1.shape).first.second);
     }
+    if(detect_collision(ball2.shape, enemy1.shape).first.first) {
+        ball2.handleCollision(detect_collision(ball2.shape, enemy1.shape).second, enemy1.restitution, detect_collision(ball2.shape, enemy1.shape).first.second);
+    }
+    if(detect_collision(ball2.shape, enemy1.enemyBall).first.first and ball2.velocity.y < 0) {
+        ball2.velocity.y = 3;
+    }
 }
 
 void tick_elements() {
     ball2.tick(1.0/60, ball2.shape.centerY - ball2.shape.radius < -2.51 );
     porcupine1.move();
+    enemy1.move();
 }
 
 /* Initialize the OpenGL rendering properties */
@@ -193,6 +203,7 @@ void initGL(GLFWwindow *window, int width, int height) {
     trampoline1     = Trampoline(4, -2.5, COLOR_RED);
     porcupine1     = Porcupine(-4, -2.5, COLOR_RED, 0.01, -6, -3.5);
     magnet1     = Magnet(0, 0, COLOR_BROWN, COLOR_BLUE, PI);
+    enemy1 = Enemy(-1, 1, COLOR_BROWN, 0.01, 45.0 * PI / 180.0, false);
 
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
