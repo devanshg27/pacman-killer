@@ -232,13 +232,13 @@ int main(int argc, char **argv) {
         if (t60.processTick()) {
             // 60 fps
             // OpenGL Draw commands
+            reset_screen();
             draw();
             // Swap Frame Buffer in double buffering
             glfwSwapBuffers(window);
 
             tick_input(window);
             tick_elements();
-            reset_screen();
         }
         // Poll for Keyboard and mouse events
         glfwPollEvents();
@@ -291,5 +291,7 @@ void reset_screen() {
         right += diff;
         left += diff;
     }
+    if(magnet1.rotation == 0) magnet1.set_position(left - 0.42, (top + bottom)/2);
+    else magnet1.set_position(right + 0.42, (top*0.8 + bottom*(1-0.8)));
     Matrices.projection = glm::ortho(left, right, bottom, top, 0.1f, 500.0f);
 }
