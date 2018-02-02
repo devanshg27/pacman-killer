@@ -40,6 +40,8 @@ char windowTitle[256];
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
 float magnetForce;
+bool keyAPressed;
+bool keyDPressed;
 bool lbutton_down = false;
 float previous_x_position;
 int curMouseVel = 0;
@@ -54,8 +56,9 @@ void inputHandler(int key, int action) {
             ball2.velocity.x -= 2.5f;
             if(ball2.velocity.x < -4.0f) ball2.velocity.x = min(ball2.velocity.x + 2.5f, -4.0f);
             ball2.acceleration.x -= 1.5f;
+            keyAPressed = true;
         }
-        else if(action == GLFW_RELEASE) {
+        else if(action == GLFW_RELEASE and keyAPressed) {
             if(ball2.velocity.x < 0) ball2.velocity.x = 0;
             ball2.acceleration.x += 1.5f;
         }
@@ -65,8 +68,9 @@ void inputHandler(int key, int action) {
             ball2.velocity.x += 2.5f;
             if(ball2.velocity.x > 4.0f) ball2.velocity.x = max(ball2.velocity.x - 2.5f, 4.0f);
             ball2.acceleration.x += 1.5f;
+            keyDPressed = true;
         }
-        else if(action == GLFW_RELEASE) {
+        else if(action == GLFW_RELEASE and keyDPressed) {
             ball2.acceleration.x -= 1.5f;
             if(ball2.velocity.x > 0) ball2.velocity.x = 0;
         }
@@ -412,6 +416,8 @@ void nextLevel() {
         ball2 = Ball(0, -1.5, COLOR_RED);
         enemyList.clear();
         magnetForce = 0;
+        keyAPressed = false;
+        keyDPressed = false;
         screen_center_x = 0;
         screen_center_y = 0;
         curMouseVel = 0;
