@@ -108,7 +108,7 @@ void draw() {
         z.draw(VP);
     }
     for(auto&z: porcupineList) {
-        z.draw(VP);
+        if(z.isAlive) z.draw(VP);
     }
     for(auto&z: enemyList) {
         z.draw(VP);
@@ -194,22 +194,27 @@ void tick_input(GLFWwindow *window) {
         }
     }
     for(auto&z: porcupineList) {
+        if(not z.isAlive) continue;
         auto val = detect_collision(ball2.shape, z.shape);
         if(val.first.first) {
-            printf("Spiked\n");
+            z.isAlive = false;
             ball2.handleCollision(val.second, z.restitution, val.first.second);
         }
     }
-    for(auto&z: enemyList) {
-        auto val = detect_collision(ball2.shape, z.shape);
+    for(auto it = enemyList.begin(); it != enemyList.end(); ) {
+        auto val = detect_collision(ball2.shape, it->shape);
         if(val.first.first) {
-            ball2.handleCollision(val.second, z.restitution, val.first.second);
+            ball2.handleCollision(val.second, it->restitution, val.first.second);
+            it = enemyList.erase(it);
             continue;
         }
-        val = detect_collision(ball2.shape, z.enemyBall);
-        if(val.first.first and ball2.velocity.y < 0.001) {
+        val = detect_collision(ball2.shape, it->enemyBall);
+        if(val.first.first and ball2.velocity.y < -0.02) {
             ball2.velocity.y = 4.2;
+            it = enemyList.erase(it);
+            continue;
         }
+        ++it;
     }
 }
 
@@ -293,13 +298,13 @@ void addWorld() {
 void addEnemy() {
     float xPos = (16.0 * (screen_center_x - 4 / screen_zoom) / 9) - 0.5;
     float yPos = -1 + 5*(rand()/(double)RAND_MAX);
-    enemyList.push_back(Enemy(xPos, yPos, COLOR_PLANK, COLOR_BALL, 0.01 + 0.01*(rand()/(double)RAND_MAX), ((-45 + 90.0 * (rand()/(double)RAND_MAX)) * PI / 180.0), bool(rand() & 1)));
+    enemyList.push_back(Enemy(xPos, yPos, COLOR_PLANK, COLOR_BALL, 0.01 + 0.01*(rand()/(double)RAND_MAX), ((-75 + 150.0 * (rand()/(double)RAND_MAX)) * PI / 180.0), bool(rand() & 1)));
 }
 
 void tick_elements() {
     ball2.tick(1.0/60, ball2.shape.centerY - ball2.shape.radius < -2.51 );
     for(auto&z: porcupineList) {
-        z.move();
+        if(z.isAlive) z.move();
     }
     for(auto&z: enemyList) {
         z.move();
@@ -352,7 +357,7 @@ void initGL(GLFWwindow *window, int width, int height) {
 int main(int argc, char **argv) {
     srand(time(0));
     int width  = 1600;
-    int height = 900, cnt = 0, nxtEnemyCnt = 0, nxtMagnetCnt = 2000/60;
+    int height = 900, cnt = 0, nxtEnemyCnt = 0, nxtMagnetCnt = 2000/60, nxtPorcupineCnt = 20000/60;
 
     window = initGLFW(width, height);
 
@@ -388,6 +393,13 @@ int main(int argc, char **argv) {
                     int temp = rand() % 2;
                     magnetForce = 2*temp - 1;
                     magnet1.rotation = temp * PI;
+                }
+            }
+            if(cnt >= nxtPorcupineCnt) {
+                nxtPorcupineCnt = 20000/60 + cnt + (rand() & 1023);
+                for(auto&z: porcupineList) {
+                    int temp = rand() % 2;
+                    if(not z.isAlive and temp) z.isAlive = true;
                 }
             }
         }
