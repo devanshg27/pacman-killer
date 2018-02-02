@@ -32,7 +32,7 @@ Ball ball2;
 Magnet magnet1;
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
-float magnetForce = 1;
+float magnetForce;
 bool lbutton_down = false;
 float previous_x_position;
 int curMouseVel = 0;
@@ -113,7 +113,7 @@ void draw() {
     for(auto&z: enemyList) {
         z.draw(VP);
     }
-    magnet1.draw(VP);
+    if(fabs(magnetForce) > 0.1) magnet1.draw(VP);
     ball2.draw(VP);
 }
 
@@ -204,6 +204,7 @@ void tick_input(GLFWwindow *window) {
         auto val = detect_collision(ball2.shape, z.shape);
         if(val.first.first) {
             ball2.handleCollision(val.second, z.restitution, val.first.second);
+            continue;
         }
         val = detect_collision(ball2.shape, z.enemyBall);
         if(val.first.first and ball2.velocity.y < 0.001) {
@@ -314,6 +315,7 @@ void initGL(GLFWwindow *window, int width, int height) {
     ball2 = Ball(0, -1.5+ball2.shape.radius, COLOR_RED);
 
     magnet1 = Magnet(0, 0, COLOR_RED, COLOR_BLACK, PI);
+    magnetForce = 0;
 
     groundList.push_back(Ground(-4, -3.5, COLOR_GREEN, COLOR_BROWN));
     groundList.push_back(Ground(4, -3.5, COLOR_GREEN, COLOR_BROWN));
@@ -350,7 +352,7 @@ void initGL(GLFWwindow *window, int width, int height) {
 int main(int argc, char **argv) {
     srand(time(0));
     int width  = 1600;
-    int height = 900, cnt = 0, nxtEnemyCnt = 0;
+    int height = 900, cnt = 0, nxtEnemyCnt = 0, nxtMagnetCnt = 2000/60;
 
     window = initGLFW(width, height);
 
@@ -375,6 +377,18 @@ int main(int argc, char **argv) {
             if(cnt >= nxtEnemyCnt) {
                 nxtEnemyCnt = 30 + cnt + (rand() & 63);
                 addEnemy();
+            }
+            if(cnt >= nxtMagnetCnt) {
+                if(fabs(magnetForce) > 0.1) {
+                    nxtMagnetCnt = 7000/60 + cnt + (rand() & 255);
+                    magnetForce = 0;
+                }
+                else {
+                    nxtMagnetCnt = 22000/60 + cnt + (rand() & 255);
+                    int temp = rand() % 2;
+                    magnetForce = 2*temp - 1;
+                    magnet1.rotation = temp * PI;
+                }
             }
         }
         // Poll for Keyboard and mouse events
