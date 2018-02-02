@@ -331,7 +331,7 @@ void initGL(GLFWwindow *window, int width, int height) {
     magnet1 = Magnet(0, 0, COLOR_RED, COLOR_BLACK, PI);
     magnetForce = 0;
 
-    levelInfo = {{200, 80}, {400, 60}, {600, 60}, {900, 80}, {1300, 100}};
+    levelInfo = {{2000, 80}, {4000, 60}, {6000, 60}, {9000, 80}, {13000, 100}};
 
     lives = 3;
     level = 1;
