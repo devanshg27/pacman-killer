@@ -78,6 +78,9 @@ extern const color_t COLOR_RED;
 extern const color_t COLOR_BLUE;
 extern const color_t COLOR_GREEN;
 extern const color_t COLOR_BLACK;
+extern const color_t COLOR_PORCUPINE;
+extern const color_t COLOR_BALL;
+extern const color_t COLOR_PLANK;
 extern const color_t COLOR_BACKGROUND;
 extern const color_t COLOR_BROWN;
 

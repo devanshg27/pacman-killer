@@ -189,7 +189,7 @@ void tick_input(GLFWwindow *window) {
     }
     for(auto&z: trampolineList) {
         auto val = detect_collision(ball2.shape, z.shape);
-        if(val.first.first and ball2.velocity.y < 0) {
+        if(val.first.first and ball2.velocity.y < 0.001) {
             ball2.handleCollision(val.second, z.restitution, val.first.second);
         }
     }
@@ -206,8 +206,8 @@ void tick_input(GLFWwindow *window) {
             ball2.handleCollision(val.second, z.restitution, val.first.second);
         }
         val = detect_collision(ball2.shape, z.enemyBall);
-        if(val.first.first and ball2.velocity.y < 0) {
-            ball2.velocity.y = 3;
+        if(val.first.first and ball2.velocity.y < 0.001) {
+            ball2.velocity.y = 4.2;
         }
     }
 }
@@ -236,7 +236,7 @@ void addWorld() {
         }
         else if(temp == 4) {
             groundList.push_back(Ground(rightBorder + groundWidth/2.0, -3.5, COLOR_GREEN, COLOR_BROWN));
-            trampolineList.push_back(Trampoline(rightBorder + groundWidth/2.0, -2.5, COLOR_RED));
+            trampolineList.push_back(Trampoline(rightBorder + groundWidth/2.0, -2.5, COLOR_BLACK));
             rightBorder += groundWidth;
         }
         else if(temp == 5) {
@@ -249,7 +249,7 @@ void addWorld() {
         }
         else if(temp == 6) {
             groundList.push_back(Ground(rightBorder + groundWidth/2.0, -3.5, COLOR_GREEN, COLOR_BROWN));
-            porcupineList.push_back(Porcupine(rightBorder + groundWidth/2.0, -2.5, COLOR_RED, 0.01, rightBorder + groundWidth/2.0 - 2, rightBorder + groundWidth/2.0 + 0.5));
+            porcupineList.push_back(Porcupine(rightBorder + groundWidth/2.0, -2.5, COLOR_PORCUPINE, 0.01, rightBorder + groundWidth/2.0 - 2, rightBorder + groundWidth/2.0 + 0.5));
             rightBorder += groundWidth;
         }
     }
@@ -270,7 +270,7 @@ void addWorld() {
         }
         else if(temp == 4) {
             groundList.push_back(Ground(leftBorder - groundWidth/2.0, -3.5, COLOR_GREEN, COLOR_BROWN));
-            trampolineList.push_back(Trampoline(leftBorder - groundWidth/2.0, -2.5, COLOR_RED));
+            trampolineList.push_back(Trampoline(leftBorder - groundWidth/2.0, -2.5, COLOR_BLACK));
             leftBorder -= groundWidth;
         }
         else if(temp == 5) {
@@ -283,7 +283,7 @@ void addWorld() {
         }
         else if(temp == 6) {
             groundList.push_back(Ground(leftBorder - groundWidth/2.0, -3.5, COLOR_GREEN, COLOR_BROWN));
-            porcupineList.push_back(Porcupine(leftBorder - groundWidth/2.0, -2.5, COLOR_RED, 0.01, leftBorder - groundWidth/2.0 - 2, leftBorder - groundWidth/2.0 + 0.5));
+            porcupineList.push_back(Porcupine(leftBorder - groundWidth/2.0, -2.5, COLOR_PORCUPINE, 0.01, leftBorder - groundWidth/2.0 - 2, leftBorder - groundWidth/2.0 + 0.5));
             leftBorder -= groundWidth;
         }
     }
@@ -292,7 +292,7 @@ void addWorld() {
 void addEnemy() {
     float xPos = (16.0 * (screen_center_x - 4 / screen_zoom) / 9) - 0.5;
     float yPos = -1 + 5*(rand()/(double)RAND_MAX);
-    enemyList.push_back(Enemy(xPos, yPos, COLOR_BROWN, COLOR_RED, 0.01 + 0.01*(rand()/(double)RAND_MAX), ((-45 + 90.0 * (rand()/(double)RAND_MAX)) * PI / 180.0), bool(rand() & 1)));
+    enemyList.push_back(Enemy(xPos, yPos, COLOR_PLANK, COLOR_BALL, 0.01 + 0.01*(rand()/(double)RAND_MAX), ((-45 + 90.0 * (rand()/(double)RAND_MAX)) * PI / 180.0), bool(rand() & 1)));
 }
 
 void tick_elements() {
@@ -313,7 +313,7 @@ void initGL(GLFWwindow *window, int width, int height) {
 
     ball2 = Ball(0, -1.5+ball2.shape.radius, COLOR_RED);
 
-    magnet1 = Magnet(0, 0, COLOR_BROWN, COLOR_BLUE, PI);
+    magnet1 = Magnet(0, 0, COLOR_RED, COLOR_BLACK, PI);
 
     groundList.push_back(Ground(-4, -3.5, COLOR_GREEN, COLOR_BROWN));
     groundList.push_back(Ground(4, -3.5, COLOR_GREEN, COLOR_BROWN));
@@ -322,9 +322,9 @@ void initGL(GLFWwindow *window, int width, int height) {
 
     poolList.push_back(Pool(0, -3.5, COLOR_GREEN, COLOR_BROWN, COLOR_BLUE));
 
-    trampolineList.push_back(Trampoline(4, -2.5, COLOR_RED));
+    trampolineList.push_back(Trampoline(4, -2.5, COLOR_BLACK));
 
-    porcupineList.push_back(Porcupine(-4, -2.5, COLOR_RED, 0.01, -6, -3.5));
+    porcupineList.push_back(Porcupine(-4, -2.5, COLOR_PORCUPINE, 0.01, -6, -3.5));
 
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
