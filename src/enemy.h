@@ -7,7 +7,7 @@
 class Enemy {
 public:
     Enemy() {}
-    Enemy(float x, float y, color_t color, float speed, float rotation, bool hasPlank);
+    Enemy(float x, float y, color_t colorPlank, color_t colorBall, float speed, float rotation, bool hasPlank);
     glm::vec3 position;
     float speed;
     float restitution, rotation;

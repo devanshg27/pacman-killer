@@ -1,14 +1,14 @@
 #include "enemy.h"
 #include "main.h"
 
-Enemy::Enemy(float x, float y, color_t color, float speed, float rotation, bool hasPlank) {
+Enemy::Enemy(float x, float y, color_t colorPlank, color_t colorBall, float speed, float rotation, bool hasPlank) {
     this->position = glm::vec3(x, y, 0);
     this->restitution = 1;
     this->rotation = rotation;
     this->speed = speed;
 
     const int sides = 50;
-    float width = 0.17, cosAng = cos(rotation), sinAng = sin(rotation);
+    float width = 0.09, cosAng = cos(rotation), sinAng = sin(rotation);
     GLfloat vertex_buffer_data_ball[6 + 3*sides]; // Triangle fan requires N+2 vertices for N triangles
 
     vertex_buffer_data_ball[0] = 0.0f;
@@ -40,9 +40,9 @@ Enemy::Enemy(float x, float y, color_t color, float speed, float rotation, bool 
         float tempY = y + 0.2 * cosAng - (side * sinAng);
         this->shape = Rectangle(tempX, tempY, tempX+side*2, tempY+0.06, this->rotation * 180.0 / PI);
     }
-    this->plankObject = create3DObject(GL_TRIANGLE_FAN, 4, vertex_buffer_data_plank, color, GL_FILL);
+    this->plankObject = create3DObject(GL_TRIANGLE_FAN, 4, vertex_buffer_data_plank, colorPlank, GL_FILL);
 
-    this->ballObject = create3DObject(GL_TRIANGLE_FAN, sizeof(vertex_buffer_data_ball)/(sizeof(vertex_buffer_data_ball[0])*3), vertex_buffer_data_ball, color, GL_FILL);
+    this->ballObject = create3DObject(GL_TRIANGLE_FAN, sizeof(vertex_buffer_data_ball)/(sizeof(vertex_buffer_data_ball[0])*3), vertex_buffer_data_ball, colorBall, GL_FILL);
     this->enemyBall = Rectangle(x-width, y, x+width, y+sqrt(0.2*0.2 - width*width), 0);
 }
 

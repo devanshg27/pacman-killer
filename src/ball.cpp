@@ -8,11 +8,9 @@ float sign_function(float a) {
     return 1;
 }
 
-Ball::Ball(float _mass, float x, float y, color_t color) {
+Ball::Ball(float x, float y, color_t color) {
     this->position = glm::vec3(x, y, 0);
     this->rotation = 0;
-    this->mass = _mass;
-    this->momentOfInertia = (_mass * 0.2 * 0.2) / 2; // I = (m*r^2)/2
     this->velocity = Vec2D(0, 0);
     this->acceleration = Vec2D(0, -5);
     angularVelocity = angularAcceleration = 0;
@@ -86,10 +84,4 @@ void Ball::handleCollision(Vec2D normal, float restitution, float correction) {
     if(correction < 0.0005) return;
     this->position.x += 0.7*normal.x*correction;
     this->position.y += 0.7*normal.y*correction;
-}
-
-bounding_box_t Ball::bounding_box() {
-    float x = this->position.x, y = this->position.y;
-    bounding_box_t bbox = { x, y, 0.4, 0.4 };
-    return bbox;
 }

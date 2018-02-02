@@ -1,3 +1,5 @@
+#include <vector>
+#include <algorithm>
 #include "main.h"
 #include "timer.h"
 #include "ball.h"
@@ -19,13 +21,15 @@ GLFWwindow *window;
 * Customizable functions *
 **************************/
 
+vector<Ground> groundList;
+vector<Pool> poolList;
+vector<Trampoline> trampolineList;
+vector<Porcupine> porcupineList;
+vector<Enemy> enemyList;
+int groundWidth = 5;
+int poolWidth = 3, leftBorder, rightBorder;
 Ball ball2;
-Ground ground1, ground2;
-Pool pool1;
-Trampoline trampoline1;
-Porcupine porcupine1;
 Magnet magnet1;
-Enemy enemy1;
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
 float magnetForce = 1;
@@ -94,14 +98,23 @@ void draw() {
     glm::mat4 MVP;  // MVP = Projection * View * Model
 
     // Scene render
-    trampoline1.draw(VP);
-    ground1.draw(VP);
-    ground2.draw(VP);
-    pool1.draw(VP);
-    porcupine1.draw(VP);
+    for(auto&z: trampolineList) {
+        z.draw(VP);
+    }
+    for(auto&z: groundList) {
+        z.draw(VP);
+    }
+    for(auto&z: poolList) {
+        z.draw(VP);
+    }
+    for(auto&z: porcupineList) {
+        z.draw(VP);
+    }
+    for(auto&z: enemyList) {
+        z.draw(VP);
+    }
     magnet1.draw(VP);
     ball2.draw(VP);
-    enemy1.draw(VP);
 }
 
 void tick_input(GLFWwindow *window) {
@@ -151,43 +164,145 @@ void tick_input(GLFWwindow *window) {
         screen_center_y += 0.01f;
         reset_screen();
     }
-    if(detect_collision(ball2.shape, pool1.shape).first.first) {
-        if(up) {
-            ball2.velocity.y = 3.5;
+
+    enemyList.erase(std::remove_if(enemyList.begin(), enemyList.end(), [](const Enemy &en) {
+        return en.position.x > ball2.position.x + 40;
+    }), enemyList.end());
+
+    for(auto&z: poolList) {
+        auto val = detect_collision(ball2.shape, z.shape);
+        if(val.first.first) {
+            if(up) {
+                ball2.velocity.y = 3.5;
+            }
+            ball2.handleCollision(val.second, z.restitution, val.first.second);
         }
-        ball2.handleCollision(detect_collision(ball2.shape, pool1.shape).second, pool1.restitution, detect_collision(ball2.shape, pool1.shape).first.second);
     }
-    if(detect_collision(ball2.shape, ground1.shape).first.first) {
-        if(up) {
-            ball2.velocity.y = 4.5;
+    for(auto&z: groundList) {
+        auto val = detect_collision(ball2.shape, z.shape);
+        if(val.first.first) {
+            if(up) {
+                ball2.velocity.y = 4.5;
+            }
+            ball2.handleCollision(val.second, z.restitution, val.first.second);
         }
-        ball2.handleCollision(detect_collision(ball2.shape, ground1.shape).second, ground1.restitution, detect_collision(ball2.shape, ground1.shape).first.second);
     }
-    if(detect_collision(ball2.shape, ground2.shape).first.first) {
-        if(up) {
-            ball2.velocity.y = 4.5;
+    for(auto&z: trampolineList) {
+        auto val = detect_collision(ball2.shape, z.shape);
+        if(val.first.first and ball2.velocity.y < 0) {
+            ball2.handleCollision(val.second, z.restitution, val.first.second);
         }
-        ball2.handleCollision(detect_collision(ball2.shape, ground2.shape).second, ground2.restitution, detect_collision(ball2.shape, ground2.shape).first.second);
     }
-    if(detect_collision(ball2.shape, trampoline1.shape).first.first and ball2.velocity.y < 0) {
-        ball2.handleCollision(detect_collision(ball2.shape, trampoline1.shape).second, trampoline1.restitution, detect_collision(ball2.shape, trampoline1.shape).first.second);
+    for(auto&z: porcupineList) {
+        auto val = detect_collision(ball2.shape, z.shape);
+        if(val.first.first) {
+            printf("Spiked\n");
+            ball2.handleCollision(val.second, z.restitution, val.first.second);
+        }
     }
-    if(detect_collision(ball2.shape, porcupine1.shape).first.first) {
-        printf("Spiked\n");
-        ball2.handleCollision(detect_collision(ball2.shape, porcupine1.shape).second, porcupine1.restitution, detect_collision(ball2.shape, porcupine1.shape).first.second);
+    for(auto&z: enemyList) {
+        auto val = detect_collision(ball2.shape, z.shape);
+        if(val.first.first) {
+            ball2.handleCollision(val.second, z.restitution, val.first.second);
+        }
+        val = detect_collision(ball2.shape, z.enemyBall);
+        if(val.first.first and ball2.velocity.y < 0) {
+            ball2.velocity.y = 3;
+        }
     }
-    if(detect_collision(ball2.shape, enemy1.shape).first.first) {
-        ball2.handleCollision(detect_collision(ball2.shape, enemy1.shape).second, enemy1.restitution, detect_collision(ball2.shape, enemy1.shape).first.second);
+}
+
+void addWorld() {
+    // 1 = normal ground
+    // 2 = medium high ground
+    // 3 = higher ground
+    // 4 = trampoline ground
+    // 5 = pool ground
+    // 6 = porcupine ground
+
+    while(rightBorder <= ball2.position.x + 40) {
+        int temp = 1 + rand() % 6;
+        if(temp == 1) {
+            groundList.push_back(Ground(rightBorder + groundWidth/2.0, -3.5, COLOR_GREEN, COLOR_BROWN));
+            rightBorder += groundWidth;
+        }
+        else if(temp == 2) {
+            groundList.push_back(Ground(rightBorder + groundWidth/2.0, -3, COLOR_GREEN, COLOR_BROWN));
+            rightBorder += groundWidth;
+        }
+        else if(temp == 3) {
+            groundList.push_back(Ground(rightBorder + groundWidth/2.0, -2.25, COLOR_GREEN, COLOR_BROWN));
+            rightBorder += groundWidth;
+        }
+        else if(temp == 4) {
+            groundList.push_back(Ground(rightBorder + groundWidth/2.0, -3.5, COLOR_GREEN, COLOR_BROWN));
+            trampolineList.push_back(Trampoline(rightBorder + groundWidth/2.0, -2.5, COLOR_RED));
+            rightBorder += groundWidth;
+        }
+        else if(temp == 5) {
+            groundList.push_back(Ground(rightBorder + groundWidth/2.0, -3.5, COLOR_GREEN, COLOR_BROWN));
+            rightBorder += groundWidth;
+            poolList.push_back(Pool(rightBorder + poolWidth/2.0, -3.5, COLOR_GREEN, COLOR_BROWN, COLOR_BLUE));
+            rightBorder += poolWidth;
+            groundList.push_back(Ground(rightBorder + groundWidth/2.0, -3.5, COLOR_GREEN, COLOR_BROWN));
+            rightBorder += groundWidth;
+        }
+        else if(temp == 6) {
+            groundList.push_back(Ground(rightBorder + groundWidth/2.0, -3.5, COLOR_GREEN, COLOR_BROWN));
+            porcupineList.push_back(Porcupine(rightBorder + groundWidth/2.0, -2.5, COLOR_RED, 0.01, rightBorder + groundWidth/2.0 - 2, rightBorder + groundWidth/2.0 + 0.5));
+            rightBorder += groundWidth;
+        }
     }
-    if(detect_collision(ball2.shape, enemy1.enemyBall).first.first and ball2.velocity.y < 0) {
-        ball2.velocity.y = 3;
+
+    while(leftBorder >= ball2.position.x - 40) {
+        int temp = 1 + rand() % 6;
+        if(temp == 1) {
+            groundList.push_back(Ground(leftBorder - groundWidth/2.0, -3.5, COLOR_GREEN, COLOR_BROWN));
+            leftBorder -= groundWidth;
+        }
+        else if(temp == 2) {
+            groundList.push_back(Ground(leftBorder - groundWidth/2.0, -3, COLOR_GREEN, COLOR_BROWN));
+            leftBorder -= groundWidth;
+        }
+        else if(temp == 3) {
+            groundList.push_back(Ground(leftBorder - groundWidth/2.0, -2.25, COLOR_GREEN, COLOR_BROWN));
+            leftBorder -= groundWidth;
+        }
+        else if(temp == 4) {
+            groundList.push_back(Ground(leftBorder - groundWidth/2.0, -3.5, COLOR_GREEN, COLOR_BROWN));
+            trampolineList.push_back(Trampoline(leftBorder - groundWidth/2.0, -2.5, COLOR_RED));
+            leftBorder -= groundWidth;
+        }
+        else if(temp == 5) {
+            groundList.push_back(Ground(leftBorder - groundWidth/2.0, -3.5, COLOR_GREEN, COLOR_BROWN));
+            leftBorder -= groundWidth;
+            poolList.push_back(Pool(leftBorder - poolWidth/2.0, -3.5, COLOR_GREEN, COLOR_BROWN, COLOR_BLUE));
+            leftBorder -= poolWidth;
+            groundList.push_back(Ground(leftBorder - groundWidth/2.0, -3.5, COLOR_GREEN, COLOR_BROWN));
+            leftBorder -= groundWidth;
+        }
+        else if(temp == 6) {
+            groundList.push_back(Ground(leftBorder - groundWidth/2.0, -3.5, COLOR_GREEN, COLOR_BROWN));
+            porcupineList.push_back(Porcupine(leftBorder - groundWidth/2.0, -2.5, COLOR_RED, 0.01, leftBorder - groundWidth/2.0 - 2, leftBorder - groundWidth/2.0 + 0.5));
+            leftBorder -= groundWidth;
+        }
     }
+}
+
+void addEnemy() {
+    float xPos = (16.0 * (screen_center_x - 4 / screen_zoom) / 9) - 0.5;
+    float yPos = -1 + 5*(rand()/(double)RAND_MAX);
+    enemyList.push_back(Enemy(xPos, yPos, COLOR_BROWN, COLOR_RED, 0.01 + 0.01*(rand()/(double)RAND_MAX), ((-45 + 90.0 * (rand()/(double)RAND_MAX)) * PI / 180.0), bool(rand() & 1)));
 }
 
 void tick_elements() {
     ball2.tick(1.0/60, ball2.shape.centerY - ball2.shape.radius < -2.51 );
-    porcupine1.move();
-    enemy1.move();
+    for(auto&z: porcupineList) {
+        z.move();
+    }
+    for(auto&z: enemyList) {
+        z.move();
+    }
 }
 
 /* Initialize the OpenGL rendering properties */
@@ -196,20 +311,25 @@ void initGL(GLFWwindow *window, int width, int height) {
     /* Objects should be created before any other gl function and shaders */
     // Create the models
 
-    ball2       = Ball(1, -2, -1.5+ball2.bounding_box().height/2, COLOR_RED);
-    ground1     = Ground(-4, -3.5, COLOR_GREEN, COLOR_BROWN);
-    ground2     = Ground(4, -3.5, COLOR_GREEN, COLOR_BROWN);
-    pool1     = Pool(0, -3.5, COLOR_GREEN, COLOR_BROWN, COLOR_BLUE);
-    trampoline1     = Trampoline(4, -2.5, COLOR_RED);
-    porcupine1     = Porcupine(-4, -2.5, COLOR_RED, 0.01, -6, -3.5);
-    magnet1     = Magnet(0, 0, COLOR_BROWN, COLOR_BLUE, PI);
-    enemy1 = Enemy(-1, 1, COLOR_BROWN, 0.01, 45.0 * PI / 180.0, false);
+    ball2 = Ball(0, -1.5+ball2.shape.radius, COLOR_RED);
+
+    magnet1 = Magnet(0, 0, COLOR_BROWN, COLOR_BLUE, PI);
+
+    groundList.push_back(Ground(-4, -3.5, COLOR_GREEN, COLOR_BROWN));
+    groundList.push_back(Ground(4, -3.5, COLOR_GREEN, COLOR_BROWN));
+    rightBorder = groundWidth + poolWidth/2.0;
+    leftBorder = -rightBorder;
+
+    poolList.push_back(Pool(0, -3.5, COLOR_GREEN, COLOR_BROWN, COLOR_BLUE));
+
+    trampolineList.push_back(Trampoline(4, -2.5, COLOR_RED));
+
+    porcupineList.push_back(Porcupine(-4, -2.5, COLOR_RED, 0.01, -6, -3.5));
 
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
     // Get a handle for our "MVP" uniform
     Matrices.MatrixID = glGetUniformLocation(programID, "MVP");
-
 
     reshapeWindow (window, width, height);
 
@@ -230,7 +350,7 @@ void initGL(GLFWwindow *window, int width, int height) {
 int main(int argc, char **argv) {
     srand(time(0));
     int width  = 1600;
-    int height = 900;
+    int height = 900, cnt = 0, nxtEnemyCnt = 0;
 
     window = initGLFW(width, height);
 
@@ -244,23 +364,24 @@ int main(int argc, char **argv) {
             // 60 fps
             // OpenGL Draw commands
             reset_screen();
+            addWorld();
             draw();
             // Swap Frame Buffer in double buffering
             glfwSwapBuffers(window);
 
             tick_input(window);
             tick_elements();
+            ++cnt;
+            if(cnt >= nxtEnemyCnt) {
+                nxtEnemyCnt = 30 + cnt + (rand() & 63);
+                addEnemy();
+            }
         }
         // Poll for Keyboard and mouse events
         glfwPollEvents();
     }
 
     quit(window);
-}
-
-bool detect_collision(bounding_box_t a, bounding_box_t b) {
-    return (abs(a.x - b.x) * 2 < (a.width + b.width)) &&
-           (abs(a.y - b.y) * 2 < (a.height + b.height));
 }
 
 void reset_screen() {
