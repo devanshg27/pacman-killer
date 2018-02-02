@@ -21,15 +21,19 @@ GLFWwindow *window;
 * Customizable functions *
 **************************/
 
+vector<pair<int, int>> levelInfo;
+
 vector<Ground> groundList;
 vector<Pool> poolList;
 vector<Trampoline> trampolineList;
 vector<Porcupine> porcupineList;
 vector<Enemy> enemyList;
 int groundWidth = 5;
+int level, score, lives, timeLeft;
 int poolWidth = 3, leftBorder, rightBorder;
 Ball ball2;
 Magnet magnet1;
+char windowTitle[256];
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
 float magnetForce;
@@ -198,18 +202,21 @@ void tick_input(GLFWwindow *window) {
         auto val = detect_collision(ball2.shape, z.shape);
         if(val.first.first) {
             z.isAlive = false;
+            --lives;
             ball2.handleCollision(val.second, z.restitution, val.first.second);
         }
     }
     for(auto it = enemyList.begin(); it != enemyList.end(); ) {
         auto val = detect_collision(ball2.shape, it->shape);
         if(val.first.first) {
+            score += 50;
             ball2.handleCollision(val.second, it->restitution, val.first.second);
             it = enemyList.erase(it);
             continue;
         }
         val = detect_collision(ball2.shape, it->enemyBall);
         if(val.first.first and ball2.velocity.y < -0.02) {
+            score += 100;
             ball2.velocity.y = 4.2;
             it = enemyList.erase(it);
             continue;
@@ -256,6 +263,7 @@ void addWorld() {
         else if(temp == 6) {
             groundList.push_back(Ground(rightBorder + groundWidth/2.0, -3.5, COLOR_GREEN, COLOR_BROWN));
             porcupineList.push_back(Porcupine(rightBorder + groundWidth/2.0, -2.5, COLOR_PORCUPINE, 0.01, rightBorder + groundWidth/2.0 - 2, rightBorder + groundWidth/2.0 + 0.5));
+            porcupineList.back().isAlive = (level >= 3);
             rightBorder += groundWidth;
         }
     }
@@ -290,6 +298,7 @@ void addWorld() {
         else if(temp == 6) {
             groundList.push_back(Ground(leftBorder - groundWidth/2.0, -3.5, COLOR_GREEN, COLOR_BROWN));
             porcupineList.push_back(Porcupine(leftBorder - groundWidth/2.0, -2.5, COLOR_PORCUPINE, 0.01, leftBorder - groundWidth/2.0 - 2, leftBorder - groundWidth/2.0 + 0.5));
+            porcupineList.back().isAlive = (level >= 3);
             leftBorder -= groundWidth;
         }
     }
@@ -317,10 +326,17 @@ void initGL(GLFWwindow *window, int width, int height) {
     /* Objects should be created before any other gl function and shaders */
     // Create the models
 
-    ball2 = Ball(0, -1.5+ball2.shape.radius, COLOR_RED);
+    ball2 = Ball(0, -1.5, COLOR_RED);
 
     magnet1 = Magnet(0, 0, COLOR_RED, COLOR_BLACK, PI);
     magnetForce = 0;
+
+    levelInfo = {{200, 80}, {400, 60}, {600, 60}, {900, 80}, {1300, 100}};
+
+    lives = 3;
+    level = 1;
+    score = 0;
+    timeLeft = 60 * levelInfo[level-1].second;
 
     groundList.push_back(Ground(-4, -3.5, COLOR_GREEN, COLOR_BROWN));
     groundList.push_back(Ground(4, -3.5, COLOR_GREEN, COLOR_BROWN));
@@ -353,11 +369,29 @@ void initGL(GLFWwindow *window, int width, int height) {
     cout << "GLSL: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
 }
 
+void nextLevel() {
+    if(score >= levelInfo[level-1].first) {
+        ball2 = Ball(0, -1.5, COLOR_RED);
+        enemyList.clear();
+        magnetForce = 0;
+        screen_center_x = 0;
+        screen_center_y = 0;
+        curMouseVel = 0;
+
+        ++level;
+        if(level >= 3) {
+            for(auto&z: porcupineList) {
+                z.isAlive = true;
+            }
+        }
+        timeLeft = 60 * levelInfo[level-1].second;
+    }
+}
 
 int main(int argc, char **argv) {
     srand(time(0));
     int width  = 1600;
-    int height = 900, cnt = 0, nxtEnemyCnt = 0, nxtMagnetCnt = 2000/60, nxtPorcupineCnt = 20000/60;
+    int height = 900, cnt = 0, nxtEnemyCnt = 0, nxtMagnetCnt = 2000/60, nxtPorcupineCnt = 10000/60;
 
     window = initGLFW(width, height);
 
@@ -366,15 +400,26 @@ int main(int argc, char **argv) {
     /* Draw in loop */
     while (!glfwWindowShouldClose(window)) {
         // Process timers
-
+        if(level > levelInfo.size()) {
+            printf("You completed the Game. Your score was %d\n", score);
+            exit(0);
+        }
+        if(lives < 0 or timeLeft < 0) {
+            printf("You lost the Game. Your score was %d\n", score);
+            exit(0);
+        }
         if (t60.processTick()) {
             // 60 fps
+            --timeLeft;
             // OpenGL Draw commands
             reset_screen();
             addWorld();
             draw();
             // Swap Frame Buffer in double buffering
             glfwSwapBuffers(window);
+
+            sprintf(windowTitle, "Pacman Killer, Level: %d, Score: %d, Lives Left: %d, Time Left: %d, Next Level: %d", level, score, lives, (timeLeft+59)/60, levelInfo[level-1].first);
+            glfwSetWindowTitle(window, windowTitle);
 
             tick_input(window);
             tick_elements();
@@ -383,7 +428,7 @@ int main(int argc, char **argv) {
                 nxtEnemyCnt = 30 + cnt + (rand() & 63);
                 addEnemy();
             }
-            if(cnt >= nxtMagnetCnt) {
+            if(level >=2 and cnt >= nxtMagnetCnt) {
                 if(fabs(magnetForce) > 0.1) {
                     nxtMagnetCnt = 7000/60 + cnt + (rand() & 255);
                     magnetForce = 0;
@@ -395,13 +440,14 @@ int main(int argc, char **argv) {
                     magnet1.rotation = temp * PI;
                 }
             }
-            if(cnt >= nxtPorcupineCnt) {
-                nxtPorcupineCnt = 20000/60 + cnt + (rand() & 1023);
+            if(cnt >= nxtPorcupineCnt and level >= 3) {
+                nxtPorcupineCnt = 10000/60 + cnt + (rand() & 1023);
                 for(auto&z: porcupineList) {
                     int temp = rand() % 2;
                     if(not z.isAlive and temp) z.isAlive = true;
                 }
             }
+            nextLevel();
         }
         // Poll for Keyboard and mouse events
         glfwPollEvents();
@@ -449,7 +495,7 @@ void reset_screen() {
         right += diff;
         left += diff;
     }
-    if(magnet1.rotation == 0) magnet1.set_position(left - 0.42, (top + bottom)/2);
+    if(magnet1.rotation == 0) magnet1.set_position(left - 0.42, (top*(0.8) + bottom*(1-0.8)));
     else magnet1.set_position(right + 0.42, (top*0.8 + bottom*(1-0.8)));
     Matrices.projection = glm::ortho(left, right, bottom, top, 0.1f, 500.0f);
 }

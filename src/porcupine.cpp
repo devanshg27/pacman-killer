@@ -7,7 +7,7 @@ Porcupine::Porcupine(float x, float y, color_t color, float x_add, float minX, f
     this->x_add = x_add;
     this->minX = minX;
     this->maxX = maxX;
-    this->isAlive = true;
+    this->isAlive = false;
     float width = 0.25;
     float height = (sqrt(3) * width / 2.0);
     const int num = 7;
