@@ -341,7 +341,7 @@ void initGL(GLFWwindow *window, int width, int height) {
     magnet1 = Magnet(0, 0, COLOR_RED, COLOR_BLACK, PI);
     magnetForce = 0;
 
-    levelInfo = {{2000, 80}, {4000, 60}, {6000, 60}, {9000, 80}, {13000, 100}};
+    levelInfo = {{2000, 80}, {4000, 70}, {6000, 70}, {9000, 80}, {13000, 100}};
 
     initVP = glm::ortho(-4*16.0f/9, 4*16.0f/9, -4.0f, 4.0f, 0.1f, 500.0f) * glm::lookAt(glm::vec3(0, 0, 3), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
