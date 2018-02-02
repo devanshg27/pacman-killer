@@ -176,7 +176,7 @@ void tick_input(GLFWwindow *window) {
     }
 
     enemyList.erase(std::remove_if(enemyList.begin(), enemyList.end(), [](const Enemy &en) {
-        return en.position.x > ball2.position.x + 40;
+        return fabs(en.position.x - ball2.position.x) > 40;
     }), enemyList.end());
 
     for(auto&z: poolList) {
