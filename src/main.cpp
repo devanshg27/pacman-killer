@@ -10,6 +10,7 @@
 #include "porcupine.h"
 #include "magnet.h"
 #include "enemy.h"
+#include "display.h"
 
 using namespace std;
 
@@ -22,15 +23,17 @@ GLFWwindow *window;
 **************************/
 
 vector<pair<int, int>> levelInfo;
-
+glm::mat4 initVP;
 vector<Ground> groundList;
 vector<Pool> poolList;
 vector<Trampoline> trampolineList;
 vector<Porcupine> porcupineList;
+vector<Display> displayList;
 vector<Enemy> enemyList;
 int groundWidth = 5;
 int level, score, lives, timeLeft;
 int poolWidth = 3, leftBorder, rightBorder;
+int maskArr[256];
 Ball ball2;
 Magnet magnet1;
 char windowTitle[256];
@@ -116,6 +119,9 @@ void draw() {
     }
     for(auto&z: enemyList) {
         z.draw(VP);
+    }
+    for(auto&z: displayList) {
+        z.draw(initVP);
     }
     if(fabs(magnetForce) > 0.1) magnet1.draw(VP);
     ball2.draw(VP);
@@ -333,6 +339,8 @@ void initGL(GLFWwindow *window, int width, int height) {
 
     levelInfo = {{2000, 80}, {4000, 60}, {6000, 60}, {9000, 80}, {13000, 100}};
 
+    initVP = glm::ortho(-4*16.0f/9, 4*16.0f/9, -4.0f, 4.0f, 0.1f, 500.0f) * glm::lookAt(glm::vec3(0, 0, 3), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+
     lives = 3;
     level = 1;
     score = 0;
@@ -348,6 +356,10 @@ void initGL(GLFWwindow *window, int width, int height) {
     trampolineList.push_back(Trampoline(4, -2.5, COLOR_BLACK));
 
     porcupineList.push_back(Porcupine(-4, -2.5, COLOR_PORCUPINE, 0.01, -6, -3.5));
+
+    for(int i=0; i<100; ++i) {
+        displayList.push_back(Display((-4 * 16.0/9) + 0.1 + i*0.2, 3.8, COLOR_BLACK, maskArr[' ']));
+    }
 
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
@@ -367,6 +379,32 @@ void initGL(GLFWwindow *window, int width, int height) {
     cout << "RENDERER: " << glGetString(GL_RENDERER) << endl;
     cout << "VERSION: " << glGetString(GL_VERSION) << endl;
     cout << "GLSL: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
+}
+
+void initMasks() {
+    maskArr[' '] = 0;
+    maskArr['-'] = 0b10;
+    maskArr['L'] = 0b101100;
+    maskArr['V'] = 0b11010000;
+    maskArr['E'] = 0b101111;
+    maskArr['C'] = 0b101101;
+    maskArr['T'] = 0b101001;
+    maskArr['F'] = 0b101011;
+    maskArr['N'] = 0b11111000;
+    maskArr['m'] = 0b010101000;
+    maskArr['M'] = 0b101010000;
+    maskArr['R'] = 0b1111011;
+    maskArr['X'] = 0b110000000;
+    maskArr['0'] = maskArr['O'] = 0b1111101;
+    maskArr['I'] = maskArr['1'] = 0b1010000;
+    maskArr['2'] = 0b0110111;
+    maskArr['3'] = 0b1010111;
+    maskArr['4'] = 0b1011010;
+    maskArr['S'] = maskArr['5'] = 0b1001111;
+    maskArr['6'] = 0b1101111;
+    maskArr['7'] = 0b1010001;
+    maskArr['8'] = 0b1111111;
+    maskArr['9'] = 0b1011111;
 }
 
 void nextLevel() {
@@ -394,7 +432,7 @@ int main(int argc, char **argv) {
     int height = 900, cnt = 0, nxtEnemyCnt = 0, nxtMagnetCnt = 2000/60, nxtPorcupineCnt = 10000/60;
 
     window = initGLFW(width, height);
-
+    initMasks();
     initGL (window, width, height);
 
     /* Draw in loop */
@@ -420,6 +458,15 @@ int main(int argc, char **argv) {
 
             sprintf(windowTitle, "Pacman Killer, Level: %d, Score: %d, Lives Left: %d, Time Left: %d, Next Level: %d", level, score, lives, (timeLeft+59)/60, levelInfo[level-1].first);
             glfwSetWindowTitle(window, windowTitle);
+            sprintf(windowTitle, "LEVEL-%d  SCORE-%d  LIVES LEFT-%d  TImME LEFT- %d  NEXT LEVEL-%d", level, score, lives, (timeLeft+59)/60, levelInfo[level-1].first);
+
+            for(int i=0; i<displayList.size(); ++i) {
+                displayList[i].mask = maskArr[' '];
+            }
+
+            for(int i=0; windowTitle[i]!='\0'; ++i) {
+                displayList[i].mask = maskArr[windowTitle[i]];
+            }
 
             tick_input(window);
             tick_elements();
